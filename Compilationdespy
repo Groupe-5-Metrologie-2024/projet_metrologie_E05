@@ -1,0 +1,49 @@
+import csv
+import matplotlib.pyplot as plt
+import numpy as np
+import statistics as stat
+import scipy
+
+
+#ouvrir un fichier et return une liste avec les valeurs
+
+#-----------
+def ouverture_fichier(nomfichier):
+    with open(nomfichier, 'r') as csvfile:
+        csvreader = csv.reader(csvfile)
+        xc = []
+        i = 0
+        for row in csvreader:
+            xc.append(float(row[1]))
+            i += 1
+            if i >= 1000:
+                break
+    return xc
+#-----------
+
+
+#Equations
+
+#------------ Calcul de delta z
+
+#------------
+
+
+#Recevoir/ouvrir CSV thermometre
+nom_fichier_temperature = "/Users/ewenmaugey/Desktop/PHS2903/codeprojet/resistance_ewen.lvm"     # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
+                                
+nom_fichier_resistivite = "/Users/ewenmaugey/Desktop/PHS2903/codeprojet/resistance_ewen.lvm"     # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
+
+#Faire les variables x = resistivite | y = temperature
+
+x = ouverture_fichier(nom_fichier_temperature)
+
+y = ouverture_fichier(nom_fichier_resistivite) 
+
+# Tracer le graphique
+plt.plot(x, y)  
+plt.xlabel('Température')  
+plt.ylabel('Résistivité')  
+plt.title('Graphique de la résistivite de l\'echantillon en fonction de la temperature')  
+plt.grid(True)  
+plt.show()  
