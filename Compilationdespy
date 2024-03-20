@@ -1,3 +1,5 @@
+#Calcul de la resistivite et Creation des graphiques 
+
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,14 +22,6 @@ def ouverture_fichier(nomfichier):
                 break
     return xc
 #-----------
-
-
-#Equations
-
-#------------ Calcul de delta z
-
-#------------
-
 
 #Recevoir/ouvrir CSV thermometre
 nom_fichier_temperature = "/Users/ewenmaugey/Desktop/PHS2903/codeprojet/resistance_ewen.lvm"     # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
