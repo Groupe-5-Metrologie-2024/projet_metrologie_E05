@@ -6,10 +6,6 @@ import numpy as np
 import statistics as stat
 import scipy
 
-
-#ouvrir un fichier et return une liste avec les valeurs
-
-#-----------
 def ouverture_fichier(nomfichier):
     with open(nomfichier, 'r') as csvfile:
         csvreader = csv.reader(csvfile)
@@ -21,20 +17,15 @@ def ouverture_fichier(nomfichier):
             if i >= 1000:
                 break
     return xc
-#-----------
 
-#Recevoir/ouvrir CSV thermometre
-nom_fichier_temperature = "/Users/ewenmaugey/Desktop/PHS2903/codeprojet/resistance_ewen.lvm"     # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
+nom_fichier_temperature = "..."     # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
                                 
-nom_fichier_resistivite = "/Users/ewenmaugey/Desktop/PHS2903/codeprojet/resistance_ewen.lvm"     # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
-
-#Faire les variables x = resistivite | y = temperature
+nom_fichier_resistivite = "..."     # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
 
 x = ouverture_fichier(nom_fichier_temperature)
 
 y = ouverture_fichier(nom_fichier_resistivite) 
 
-# Tracer le graphique
 plt.plot(x, y)  
 plt.xlabel('Température')  
 plt.ylabel('Résistivité')  
