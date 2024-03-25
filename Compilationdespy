@@ -1,0 +1,34 @@
+#Calcul de la resistivite et Creation des graphiques 
+
+import csv
+import matplotlib.pyplot as plt
+import numpy as np
+import statistics as stat
+import scipy
+
+def ouverture_fichier(nomfichier):
+    with open(nomfichier, 'r') as csvfile:
+        csvreader = csv.reader(csvfile)
+        xc = []
+        i = 0
+        for row in csvreader:
+            xc.append(float(row[1]))
+            i += 1
+            if i >= 1000:
+                break
+    return xc
+
+nom_fichier_temperature = "..."     # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
+                                
+nom_fichier_resistivite = "..."     # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
+
+x = ouverture_fichier(nom_fichier_temperature)
+
+y = ouverture_fichier(nom_fichier_resistivite) 
+
+plt.plot(x, y)  
+plt.xlabel('Température')  
+plt.ylabel('Résistivité')  
+plt.title('Graphique de la résistivite de l\'echantillon en fonction de la temperature')  
+plt.grid(True)  
+plt.show()  
