@@ -15,5 +15,3 @@ Pour download les modifications: vscode -> icone Source control -> clic sur l'ic
 Pour Upload : vscode -> clic sur le "+" à coté du fichier -> Selectionner sa branche -> écrire dans la boite "Message" qqch -> Valider
 
 Ne mettre dans "Compilationdespy" et "Lancement" que des codes fonctionnels pour tout autre code --> Jupy_projet
-
-hg
