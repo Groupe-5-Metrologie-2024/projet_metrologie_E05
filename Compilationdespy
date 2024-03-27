@@ -8,6 +8,7 @@ import scipy
 import numpy as np
 from scipy.special import kv, iv
 import os
+import time
 
 #fonctions -------------------------------------------------------------------------------------------------------------
 
@@ -39,6 +40,21 @@ def Calcul_total(file_name) :
     Lresultat = calcul_resitivite()
     list_to_csv(Lresultat, file_name)
 
+def calcul_resitivite() :
+    Liste = []
+    x = [1,2,3]
+    for i in x :
+        Liste.append(i)
+
+    return Liste
+
+def attendre_fichier(nom_fichier, delai_attente=1):
+
+    while not os.path.exists(nom_fichier):
+        print(f"En attente du fichier {nom_fichier}...")
+        time.sleep(delai_attente)
+
+
 #Nom des fichiers ----------------------------------------------------------------------------------------------------------    
 
 nom_fichier_temperature = "Temperature"             # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
@@ -47,9 +63,12 @@ nom_fichier_resistivite = "Resistivite"             # Remplacez "mon_fichier.csv
 
 #Calcul resistivite --------------------------------------------------------------------------------------------------------
 
-#Calcul_total(nom_fichier_resistivite)              #Retirer le # pour activer la fonction
+Calcul_total(nom_fichier_resistivite)              #Retirer le # pour activer la fonction
 
 #Listes graphiques depuis les CSV ------------------------------------------------------------------------------------------ 
+
+attendre_fichier(nom_fichier_resistivite)
+attendre_fichier(nom_fichier_temperature)
 
 x = ouverture_fichier(nom_fichier_temperature)
 y = ouverture_fichier(nom_fichier_resistivite) 
