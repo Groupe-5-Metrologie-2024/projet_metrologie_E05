@@ -57,13 +57,48 @@ def attendre_fichier(nom_fichier, delai_attente=1):
 
 #Nom des fichiers ----------------------------------------------------------------------------------------------------------    
 
-nom_fichier_temperature = "Temperature"             # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
+nom_fichier_temperature = "Temperature2"             # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
                                 
 nom_fichier_resistivite = "Resistivite"             # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
 
 #Calcul resistivite --------------------------------------------------------------------------------------------------------
 
-Calcul_total(nom_fichier_resistivite)              #Retirer le # pour activer la fonction
+#Calcul_total(nom_fichier_resistivite)              #Retirer le # pour activer la fonction
+
+#---
+
+# Chemin vers votre fichier CSV d'entrée et de sortie
+fichier_entree = "Temperature"
+fichier_sortie = "Temperature2"
+
+# Ouvrir le fichier d'entrée en mode lecture et le fichier de sortie en mode écriture
+with open(fichier_entree, 'r', newline='') as csv_entree, open(fichier_sortie, 'w', newline='') as csv_sortie:
+    lecteur_csv = csv.reader(csv_entree)
+    lignes_modifiees = []
+    
+    # Parcourir chaque ligne du fichier CSV
+    for ligne in lecteur_csv:
+        ligne_modifiee = []
+        # Parcourir chaque élément de la ligne
+        for element in ligne:
+            try:
+                # Tente de convertir l'élément en un nombre
+                nombre = float(element)
+                # Si la conversion réussit, ajoute une virgule devant le nombre
+                ligne_modifiee.append(',' + element)
+            except ValueError:
+                # Si la conversion échoue, conserve l'élément tel quel
+                ligne_modifiee.append(element)
+        
+        # Ajouter la ligne modifiée à la liste des lignes modifiées
+        lignes_modifiees.append(ligne_modifiee)
+
+    # Écrire les lignes modifiées dans le fichier de sortie
+    for ligne in lignes_modifiees:
+        csv_sortie.write(','.join(ligne) + '\n')
+
+
+#---
 
 #Listes graphiques depuis les CSV ------------------------------------------------------------------------------------------ 
 
