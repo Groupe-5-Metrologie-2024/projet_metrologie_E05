@@ -9,6 +9,10 @@ import numpy as np
 from scipy.special import kv, iv
 import os
 import time
+#Modification generales
+
+#Nombre de lignes - 1 du fichier de temperature
+nombre_lignes_conservees = 599
 
 #fonctions -------------------------------------------------------------------------------------------------------------
 
@@ -54,16 +58,100 @@ def attendre_fichier(nom_fichier, delai_attente=1):
         print(f"En attente du fichier {nom_fichier}...")
         time.sleep(delai_attente)
 
+def conserver_premieres_lignes(fichier_entree, nombre_lignes_conservees, fichier_sortie):
+    # Ouvrir le fichier d'entrée en mode lecture et le fichier de sortie en mode écriture
+    with open(fichier_entree, 'r', newline='') as csv_entree, open(fichier_sortie, 'w', newline='') as csv_sortie:
+        lecteur_csv = csv.reader(csv_entree)
+        ecrivain_csv = csv.writer(csv_sortie)
+        
+        # Parcourir chaque ligne du fichier CSV
+        for indice_ligne, ligne in enumerate(lecteur_csv, start=1):
+            # Écrire la ligne dans le fichier de sortie si elle est avant ou à la ligne spécifiée
+            if indice_ligne <= nombre_lignes_conservees:
+                ecrivain_csv.writerow(ligne)
+            else:
+                # Si on a atteint la ligne spécifiée, sortir de la boucle
+                break
+
+def modifier_virgule_csv(fichier_entree, fichier_sortie):
+
+    with open(fichier_entree, 'r', newline='') as csv_entree, open(fichier_sortie, 'w', newline='') as csv_sortie:
+        lecteur_csv = csv.reader(csv_entree)
+        ecrivain_csv = csv.writer(csv_sortie)
+        
+        # Parcourir chaque ligne du fichier CSV
+        for ligne in lecteur_csv:
+            ligne_modifiee = []
+            # Parcourir chaque élément de la ligne
+            for element in ligne:
+                try:
+                    # Tente de convertir l'élément en un nombre
+                    nombre = float(element)
+                    # Si la conversion réussit, ajoute une virgule devant le nombre
+                    ligne_modifiee.append(',' + element)
+                except ValueError:
+                    # Si la conversion échoue, conserve l'élément tel quel
+                    ligne_modifiee.append(element)
+            
+            # Écrire la ligne modifiée dans le fichier de sortie
+            csv_sortie.write(','.join(ligne_modifiee) + '\n')
+
+def supprimer_fichier(fichier):
+    try:
+        os.remove(fichier)
+        print(f"Le fichier {fichier} a été supprimé avec succès.")
+    except FileNotFoundError:
+        print(f"Le fichier {fichier} n'existe pas.")
+    except Exception as e:
+        print(f"Une erreur s'est produite lors de la suppression du fichier : {e}")
+
+def supprimer_premiere_ligne(fichier_entree, fichier_sortie):
+    lignes_restantes = []
+    with open(fichier_entree, 'r', newline='') as csv_entree:
+        lecteur_csv = csv.reader(csv_entree)
+        # Ignorer la première ligne
+        next(lecteur_csv)
+        # Collecter les lignes restantes
+        for ligne in lecteur_csv:
+            lignes_restantes.append(ligne)
+    
+    # Écrire les lignes restantes dans le fichier de sortie
+    with open(fichier_sortie, 'w', newline='') as csv_sortie:
+        ecrivain_csv = csv.writer(csv_sortie)
+        ecrivain_csv.writerows(lignes_restantes)
 
 #Nom des fichiers ----------------------------------------------------------------------------------------------------------    
 
-nom_fichier_temperature = "Temperature"             # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
+nom_fichier_temperature = "Temperature_fini"             
                                 
-nom_fichier_resistivite = "Resistivite"             # Remplacez "mon_fichier.csv" par le nom de votre fichier CSV
+nom_fichier_resistivite = "Resistivite_fini"             
 
 #Calcul resistivite --------------------------------------------------------------------------------------------------------
 
-Calcul_total(nom_fichier_resistivite)              #Retirer le # pour activer la fonction
+#Calcul_total(nom_fichier_resistivite)              #Retirer le # pour activer la fonction
+
+#Modifications pour les CSV ---
+
+fichier_entree = "Temperature"
+fichier_entree2 = "Resistivite"
+fichier_temportaire = "Temperature_2"
+fichier_temportaire2 = "Temperature_3"
+fichier_entree_3 = "Resistivite3"
+
+#T
+supprimer_premiere_ligne(fichier_entree, fichier_temportaire)
+conserver_premieres_lignes(fichier_temportaire, nombre_lignes_conservees, fichier_temportaire2)
+modifier_virgule_csv(fichier_temportaire2, nom_fichier_temperature)
+
+#R
+conserver_premieres_lignes(fichier_entree2, nombre_lignes_conservees, fichier_entree_3)
+modifier_virgule_csv(fichier_entree_3, nom_fichier_resistivite)
+
+#Delete
+supprimer_fichier(fichier_temportaire)
+supprimer_fichier(fichier_temportaire2)
+supprimer_fichier(fichier_entree_3)
+
 
 #Listes graphiques depuis les CSV ------------------------------------------------------------------------------------------ 
 
