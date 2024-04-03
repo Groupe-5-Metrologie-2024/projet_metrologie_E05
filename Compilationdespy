@@ -146,8 +146,11 @@ modifier_virgule_csv(fichier_temportaire2, nom_fichier_temperature)
 #R
 conserver_premieres_lignes(fichier_entree2, nombre_lignes_conservees, fichier_entree_3)
 modifier_virgule_csv(fichier_entree_3, nom_fichier_resistivite)
+
+#Delete
 supprimer_fichier(fichier_temportaire)
 supprimer_fichier(fichier_temportaire2)
+supprimer_fichier(fichier_entree_3)
 
 
 #Listes graphiques depuis les CSV ------------------------------------------------------------------------------------------ 
