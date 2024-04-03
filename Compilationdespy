@@ -11,8 +11,8 @@ import os
 import time
 #Modification generales
 
-#IL FAUT RETIRER LE # LIGNE 130
-nombre_lignes_conservees = 15
+#Nombre de lignes - 1 du fichier de temperature
+nombre_lignes_conservees = 599
 
 #fonctions -------------------------------------------------------------------------------------------------------------
 
@@ -136,6 +136,7 @@ fichier_entree = "Temperature"
 fichier_entree2 = "Resistivite"
 fichier_temportaire = "Temperature_2"
 fichier_temportaire2 = "Temperature_3"
+fichier_entree_3 = "Resistivite3"
 
 #T
 supprimer_premiere_ligne(fichier_entree, fichier_temportaire)
@@ -143,8 +144,8 @@ conserver_premieres_lignes(fichier_temportaire, nombre_lignes_conservees, fichie
 modifier_virgule_csv(fichier_temportaire2, nom_fichier_temperature)
 
 #R
-conserver_premieres_lignes(fichier_entree2, nombre_lignes_conservees, nom_fichier_resistivite)
-
+conserver_premieres_lignes(fichier_entree2, nombre_lignes_conservees, fichier_entree_3)
+modifier_virgule_csv(fichier_entree_3, nom_fichier_resistivite)
 supprimer_fichier(fichier_temportaire)
 supprimer_fichier(fichier_temportaire2)
 
