@@ -40,18 +40,6 @@ def list_to_csv(input_list, file_name):
         for row in input_list:
             writer.writerow([row])
 
-def Calcul_total(file_name) :
-    Lresultat = calcul_resitivite()
-    list_to_csv(Lresultat, file_name)
-
-def calcul_resitivite() :
-    Liste = []
-    x = [1,2,3]
-    for i in x :
-        Liste.append(i)
-
-    return Liste
-
 def attendre_fichier(nom_fichier, delai_attente=1):
 
     while not os.path.exists(nom_fichier):
