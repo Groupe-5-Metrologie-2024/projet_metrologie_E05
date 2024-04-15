@@ -22,7 +22,8 @@ from scipy.optimize import fsolve
 #Nombre de lignes - 1 du fichier de temperature
 nombre_lignes_conservees = 599
 
-#sinus          
+#A MODIFIER - CE SONT DES SINUS RANDOM - PAS LES BONS
+         
 x = np.linspace(0.0001,1,10000)
 y_1=np.sin(2*np.pi*10000*x)
 y_2=2*np.sin(2*np.pi*10000*x+897325)
@@ -196,10 +197,6 @@ nom_fichier_temperature = "Temperature_fini"
                                 
 nom_fichier_resistivite = "Resistivite_fini"             
 
-#Calcul resistivite --------------------------------------------------------------------------------------------------------
-
-#Calcul_total(nom_fichier_resistivite)              #Retirer le # pour activer la fonction
-
 #Modifications pour les CSV ---
 
 fichier_entree = "Temperature"
@@ -240,7 +237,17 @@ n=1
 rho_approx=820*10**(-9)
 rho_f = solve_z(z)[0]
 
+print('')
+print('')
+print('############################################################################################################################################')
+print("WARNING - RESULTAT - DEBUT")
+print('')
+print('')
 print("Impédance est :",z,"Résistivité est : ",rho_f, "Ohm/m^3")
+print('')
+print('')
+print("WARNING - RESULTAT - FIN")
+print('############################################################################################################################################')
 
 #Listes graphiques depuis les CSV ------------------------------------------------------------------------------------------ 
 
