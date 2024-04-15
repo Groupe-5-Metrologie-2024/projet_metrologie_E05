@@ -29,7 +29,7 @@ y_1=np.sin(2*np.pi*10000*x)
 y_2=2*np.sin(2*np.pi*10000*x+897325)
 
 
-#fonctions -------------------------------------------------------------------------------------------------------------
+#fonctions ---------------------------------------------------------------------------------------------------------------
 
 def ouverture_fichier(nomfichier):
     with open(nomfichier, 'r') as csvfile:
@@ -191,13 +191,13 @@ def solve_z(z):
             i+=1
 
 
-#Nom des fichiers ----------------------------------------------------------------------------------------------------------    
+#Nom des fichiers ---------------------------------------------------------------------------------------------------------------   
 
 nom_fichier_temperature = "Temperature_fini"             
                                 
 nom_fichier_resistivite = "Resistivite_fini"             
 
-#Modifications pour les CSV ---
+#Modifications pour les CSV ------------------------------------------------------------------------------------------------------   
 
 fichier_entree = "Temperature"
 fichier_entree2 = "Resistivite"
@@ -219,7 +219,7 @@ supprimer_fichier(fichier_temportaire)
 supprimer_fichier(fichier_temportaire2)
 supprimer_fichier(fichier_entree_3)
 
-# MATHS---------------------
+# MATHS ----------------------------------------------------------------------------------------------------------------------------    
 
 #impedance
 z_vect = phase([y_1,y_2])
@@ -249,7 +249,7 @@ print('')
 print("WARNING - RESULTAT - FIN")
 print('############################################################################################################################################')
 
-#Listes graphiques depuis les CSV ------------------------------------------------------------------------------------------ 
+#Listes graphiques depuis les CSV ---------------------------------------------------------------------------------------------------------------
 
 attendre_fichier(nom_fichier_resistivite)
 attendre_fichier(nom_fichier_temperature)
@@ -257,7 +257,7 @@ attendre_fichier(nom_fichier_temperature)
 x = ouverture_fichier(nom_fichier_temperature)
 y = ouverture_fichier(nom_fichier_resistivite) 
 
-#Generation des graphiques -------------------------------------------------------------------------------------------------
+#Generation des graphiques -----------------------------------------------------------------------------------------------------------------------
 
 plt.plot(x, y)  
 plt.xlabel('Température')  
@@ -266,4 +266,4 @@ plt.title('Graphique de la résistivite de l\'echantillon en fonction de la temp
 plt.grid(True)  
 plt.show() 
 
-#----------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------------------------------------------------------------
