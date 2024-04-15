@@ -161,7 +161,6 @@ def phase(output):
         dephasage = max[temps_ref]
         phaseur = voltage*np.exp(-1j*2*np.pi*10000*dephasage)
         phaseurs.append(phaseur)
-        print(voltage)
     return phaseurs
 
 def f_re(xi,rho):
