@@ -22,6 +22,22 @@ Activation_Production_CSV_rho = 1
 Activation_Graphique_résistivité_Température = 1
 Activation_Graphique_Température_Temps = 1
 
+
+if Activation_Production_CSV_rho == 1 :
+    print('Activation_Production_CSV_rho : on')
+else :
+    print('Activation_Production_CSV_rho : off')
+
+if Activation_Graphique_résistivité_Température == 1 :
+    print('Activation_Graphique_Resistivite_Temperature : on')
+else :
+    print('Activation_Graphique_Resistivite_Temperature : off')
+
+if Activation_Graphique_Température_Temps == 1 :
+    print('Activation_Graphique_Température_Temps : on')
+else :
+    print('Activation_Graphique_Température_Temps : off')
+
 #----------------- Menu d'activation des programmes FIN
 
 #----------------- Modification generales DEBUT
@@ -272,15 +288,15 @@ def TOTAL(Materiau):
 print('#CODE 1 DEBUT ---------------------------------------------------------------------------------------------------------------')
 
 if Activation_Production_CSV_rho == 1:
-
+    print('CALCUL...')
     z_f, rho_f = TOTAL(Nom_materiau_utilisé)
 
     # Convertir les tableaux NumPy à une dimension en listes simples
     rho_f = [item[0] for item in rho_f]
-
+    print('CALCUL FINI')
     list_to_csv(rho_f,'300_valeurs_de_rho')
-else :
-    print('Activation_Production_CSV_rho : off')
+    print('PRODUCTION CSV')
+
 print('#CODE 1 FIN ---------------------------------------------------------------------------------------------------------------')
 
 print('#CODE 2 DEBUT ---------------------------------------------------------------------------------------------------------------')
@@ -288,7 +304,7 @@ print('#CODE 2 DEBUT -----------------------------------------------------------
 if Activation_Graphique_résistivité_Température == 1 :
     #Nom des fichiers ---------------------------------------------------------------------------------------------------------------   
 
-    nom_fichier_temperature = "Temperature_fini"             
+    nom_fichier_temperature = "Temperature_fini_PALIER"             
                                 
     nom_fichier_resistivite = "Resistivite_fini"             
 
@@ -301,28 +317,33 @@ if Activation_Graphique_résistivité_Température == 1 :
     fichier_entree_3 = "Resistivite3"
 
     #T
+    print('MODIFICATION DU CSV DE TEMPERATURE')
     supprimer_premiere_ligne(fichier_entree, fichier_temportaire)
     conserver_premieres_lignes(fichier_temportaire, nombre_lignes_conservees, fichier_temportaire2)
     modifier_virgule_csv(fichier_temportaire2, nom_fichier_temperature)
 
     #R
+    print('MODIFICATION DU CSV DE RESISTIVITE')
     conserver_premieres_lignes(fichier_entree2, nombre_lignes_conservees, fichier_entree_3)
     modifier_virgule_csv(fichier_entree_3, nom_fichier_resistivite)
 
     #Delete
+    print('SUPPRESSION DES FICHIERS TEMPORAIRES')
     supprimer_fichier(fichier_temportaire)
     supprimer_fichier(fichier_temportaire2)
     supprimer_fichier(fichier_entree_3)
 
     #Listes graphiques depuis les CSV ---------------------------------------------------------------------------------------------------------------
-
+    print('ATTENTE DES FICHIER')
     attendre_fichier(nom_fichier_resistivite)
     attendre_fichier(nom_fichier_temperature)
+    print('FICHIER OBTENUS')
 
     x = ouverture_fichier(nom_fichier_temperature)
     y = ouverture_fichier(nom_fichier_resistivite) 
 
     #Generation des graphiques -----------------------------------------------------------------------------------------------------------------------
+    print('GENERATION GRAPHIQUE 1')
 
     plt.plot(x, y)  
     plt.xlabel('Température')  
@@ -332,32 +353,37 @@ if Activation_Graphique_résistivité_Température == 1 :
     plt.show() 
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------
-else :
-    print('Activation_Graphique_Resistivite_Temperature : off')
+
 
 print('#CODE 2 FIN ---------------------------------------------------------------------------------------------------------------')
 
 print('#CODE 3 DEBUT -------------------------------------------------------------------------------------------------------------')
 
 if Activation_Graphique_Température_Temps == 1 :
-    nom_fichier_temperature = "Temperature_fini"             
+    fichier_entree = "Temperature"
+    nom_fichier_temperature = "Temperature_fini_ARDUINO"             
     fichier_temportaire = "Temperature_2"
 
+    print('MODIFICATION DU CSV DE TEMPERATURE')
     supprimer_premiere_ligne(fichier_entree, fichier_temportaire)
     modifier_virgule_csv(fichier_temportaire, nom_fichier_temperature)
+
+    print('SUPPRESSION DU FICHIER TEMPORAIRE')
     supprimer_fichier(fichier_temportaire)
+
+    print('ATTENTE DU FICHIER')
     attendre_fichier(nom_fichier_temperature)
 
     y = ouverture_fichier(nom_fichier_temperature)
     x = list(range(0,len(y)))
 
+    print('GENERATION GRAPHIQUE 2')
     plt.plot(x, y)  
     plt.xlabel('Temps')  
     plt.ylabel('Temperature')  
     plt.title('Graphique de la résistivite de l\'echantillon en fonction de la temperature')  
     plt.grid(True)  
     plt.show() 
-else :
-    print('Activation_Graphique_Température_Temps : off')
+
 
 print('#CODE 3 FIN ---------------------------------------------------------------------------------------------------------------')
