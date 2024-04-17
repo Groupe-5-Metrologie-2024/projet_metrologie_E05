@@ -16,7 +16,7 @@ from scipy.special import iv as I
 from scipy.special import kv as K
 from scipy.optimize import fsolve
 
-#----------------- Menu d'activation des programmes DEBUT
+print('#----------------- Menu d\'activation des programmes DEBUT')
 
 Activation_Production_CSV_rho = 1
 Activation_Graphique_résistivité_Température = 1
@@ -38,13 +38,13 @@ if Activation_Graphique_Température_Temps == 1 :
 else :
     print('Activation_Graphique_Température_Temps : off')
 
-#----------------- Menu d'activation des programmes FIN
+print('#----------------- Menu d\'activation des programmes FIN')
 
 #----------------- Modification generales DEBUT
 
 if Activation_Graphique_résistivité_Température == 1 :  
     #Nombre de lignes - 1 du fichier de temperature
-    nombre_lignes_conservees = 30
+    nombre_lignes_conservees = 31
 
 if Activation_Graphique_Température_Temps == 1 :
     #Remplacer par le fichier de temperature
@@ -337,7 +337,7 @@ if Activation_Graphique_résistivité_Température == 1 :
     print('ATTENTE DES FICHIER')
     attendre_fichier(nom_fichier_resistivite)
     attendre_fichier(nom_fichier_temperature)
-    print('FICHIER OBTENUS')
+    print('FICHIERS OBTENUS')
 
     x = ouverture_fichier(nom_fichier_temperature)
     y = ouverture_fichier(nom_fichier_resistivite) 
