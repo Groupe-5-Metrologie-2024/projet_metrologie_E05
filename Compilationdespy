@@ -18,9 +18,9 @@ from scipy.optimize import fsolve
 
 #----------------- Menu d'activation des programmes DEBUT
 
-Activation_Production_CSV_rho = 0
-Activation_Graphique_résistivité_Température = 0
-Activation_Graphique_Température_Temps = 0
+Activation_Production_CSV_rho = 1
+Activation_Graphique_résistivité_Température = 1
+Activation_Graphique_Température_Temps = 1
 
 #----------------- Menu d'activation des programmes FIN
 
@@ -28,7 +28,7 @@ Activation_Graphique_Température_Temps = 0
 
 if Activation_Graphique_résistivité_Température == 1 :  
     #Nombre de lignes - 1 du fichier de temperature
-    nombre_lignes_conservees = 5
+    nombre_lignes_conservees = 50
 
 if Activation_Graphique_Température_Temps == 1 :
     #Remplacer par le fichier de temperature
@@ -65,7 +65,7 @@ def ouverture_fichier(nomfichier):
         for row in csvreader:
             xc.append(float(row[1]))
             i += 1
-            if i >= 10000:
+            if i >= 100000:
                 break
     return xc
 
@@ -293,7 +293,7 @@ if Activation_Graphique_résistivité_Température == 1 :
 
     #Modifications pour les CSV ------------------------------------------------------------------------------------------------------   
 
-    fichier_entree = "Temperature"
+    fichier_entree = "Temperature_palier"
     fichier_entree2 = "300_valeurs_de_rho"
     fichier_temportaire = "Temperature_2"
     fichier_temportaire2 = "Temperature_3"
