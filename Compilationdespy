@@ -18,8 +18,8 @@ from scipy.optimize import fsolve
 
 print('#----------------- Menu d\'activation des programmes DEBUT')
 
-Activation_Production_CSV_rho = 0
-Activation_Graphique_résistivité_Température = 0
+Activation_Production_CSV_rho = 1
+Activation_Graphique_résistivité_Température = 1
 Activation_Graphique_Température_Temps = 1
 
 
@@ -49,10 +49,10 @@ if Activation_Graphique_résistivité_Température == 1 :
 if Activation_Graphique_Température_Temps == 1 :
     #Remplacer par le fichier de temperature
     fichier_entree = "Données/Temperature"
-    Materiau_choisit = 'Molyb'
+    Materiau_choisit = 'Invar36'
 
 
-Nom_materiau_utilisé = "Données_molyb"
+Nom_materiau_utilisé = "Données_cuivre"
 
 #Cuivre :
 b=1.58*10**(-3)
