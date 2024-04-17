@@ -85,7 +85,6 @@ attendre_fichier(nom_fichier_temperature)
 
 y = ouverture_fichier(nom_fichier_temperature)
 x = list(range(0,len(y)))
-print(x)
 
 plt.plot(x, y)  
 plt.xlabel('Temps')  
