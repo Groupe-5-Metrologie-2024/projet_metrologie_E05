@@ -51,7 +51,7 @@ if Activation_Graphique_Température_Temps == 1 :
     fichier_entree = "Temperature"
 
 
-Nom_materiau_utilisé = "Données_cuivre"
+Nom_materiau_utilisé = "Données_molyb"
 
 #Cuivre :
 b=1.58*10**(-3)
