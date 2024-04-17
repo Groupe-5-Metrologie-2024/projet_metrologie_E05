@@ -2,7 +2,6 @@
 
 import csv
 import matplotlib.pyplot as plt
-import numpy as np
 import statistics as stat
 import scipy
 import numpy as np
@@ -20,7 +19,7 @@ from scipy.optimize import fsolve
 #Modification generales
 
 #Nombre de lignes - 1 du fichier de temperature
-nombre_lignes_conservees = 599
+nombre_lignes_conservees = 10000
 
 #A MODIFIER - CE SONT DES SINUS RANDOM - PAS LES BONS
          
@@ -39,7 +38,7 @@ def ouverture_fichier(nomfichier):
         for row in csvreader:
             xc.append(float(row[1]))
             i += 1
-            if i >= 1000:
+            if i >= 10000:
                 break
     return xc
 
