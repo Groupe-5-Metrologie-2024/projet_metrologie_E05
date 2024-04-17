@@ -1,0 +1,96 @@
+
+import csv
+import matplotlib.pyplot as plt
+import numpy as np
+import statistics as stat
+import scipy
+import os
+import time
+
+#Remplacer par le fichier de temperature
+fichier_entree = "Temperature"
+
+def ouverture_fichier(nomfichier):
+    with open(nomfichier, 'r') as csvfile:
+        csvreader = csv.reader(csvfile)
+        xc = []
+        i = 0
+        for row in csvreader:
+            xc.append(float(row[1]))
+            i += 1
+            if i >= 10000:
+                break
+    return xc
+
+def attendre_fichier(nom_fichier, delai_attente=1):
+
+    while not os.path.exists(nom_fichier):
+        print(f"En attente du fichier {nom_fichier}...")
+        time.sleep(delai_attente)
+
+def modifier_virgule_csv(fichier_entree, fichier_sortie):
+
+    with open(fichier_entree, 'r', newline='') as csv_entree, open(fichier_sortie, 'w', newline='') as csv_sortie:
+        lecteur_csv = csv.reader(csv_entree)
+        ecrivain_csv = csv.writer(csv_sortie)
+        
+        # Parcourir chaque ligne du fichier CSV
+        for ligne in lecteur_csv:
+            ligne_modifiee = []
+            # Parcourir chaque élément de la ligne
+            for element in ligne:
+                try:
+                    # Tente de convertir l'élément en un nombre
+                    nombre = float(element)
+                    # Si la conversion réussit, ajoute une virgule devant le nombre
+                    ligne_modifiee.append(',' + element)
+                except ValueError:
+                    # Si la conversion échoue, conserve l'élément tel quel
+                    ligne_modifiee.append(element)
+            
+            # Écrire la ligne modifiée dans le fichier de sortie
+            csv_sortie.write(','.join(ligne_modifiee) + '\n')
+
+def supprimer_fichier(fichier):
+    try:
+        os.remove(fichier)
+        print(f"Le fichier {fichier} a été supprimé avec succès.")
+    except FileNotFoundError:
+        print(f"Le fichier {fichier} n'existe pas.")
+    except Exception as e:
+        print(f"Une erreur s'est produite lors de la suppression du fichier : {e}")
+
+def supprimer_premiere_ligne(fichier_entree, fichier_sortie):
+    lignes_restantes = []
+    with open(fichier_entree, 'r', newline='') as csv_entree:
+        lecteur_csv = csv.reader(csv_entree)
+        # Ignorer la première ligne
+        next(lecteur_csv)
+        # Collecter les lignes restantes
+        for ligne in lecteur_csv:
+            lignes_restantes.append(ligne)
+    
+    # Écrire les lignes restantes dans le fichier de sortie
+    with open(fichier_sortie, 'w', newline='') as csv_sortie:
+        ecrivain_csv = csv.writer(csv_sortie)
+        ecrivain_csv.writerows(lignes_restantes)
+
+nom_fichier_temperature = "Temperature_fini"             
+fichier_temportaire = "Temperature_2"
+
+supprimer_premiere_ligne(fichier_entree, fichier_temportaire)
+modifier_virgule_csv(fichier_temportaire, nom_fichier_temperature)
+supprimer_fichier(fichier_temportaire)
+attendre_fichier(nom_fichier_temperature)
+
+y = ouverture_fichier(nom_fichier_temperature)
+x = list(range(0,len(y)))
+print(x)
+
+plt.plot(x, y)  
+plt.xlabel('Temps')  
+plt.ylabel('Temperature')  
+plt.title('Graphique de la résistivite de l\'echantillon en fonction de la temperature')  
+plt.grid(True)  
+plt.show() 
+
