@@ -28,7 +28,7 @@ Activation_Graphique_Température_Temps = 1
 
 if Activation_Graphique_résistivité_Température == 1 :  
     #Nombre de lignes - 1 du fichier de temperature
-    nombre_lignes_conservees = 50
+    nombre_lignes_conservees = 30
 
 if Activation_Graphique_Température_Temps == 1 :
     #Remplacer par le fichier de temperature
