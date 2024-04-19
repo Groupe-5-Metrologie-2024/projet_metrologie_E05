@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import fsolve
 import csv
 from scipy.interpolate import interp1d
+from scipy.special import modstruve as L
 
 def analyse_donnees(nomfichier):
     with open(nomfichier, 'r') as csvfile:
@@ -31,8 +32,11 @@ omega = 2*np.pi*10**4
 mu0 = mu_0
 e0 = epsilon_0
 er = 1
-a = 10.43*10**(-3)/2
-n = 1000
+d = 15.75*10**(-3)/2-(9.78*10**(-3)/2+1*10**(-3))
+n = 458
+a = 15.75*10**(-3)/2-d/2
+l=50.15*10**(-3)-2.02*10**(-3)-2.08*10**(-3)
+
 rho_approx_cuivre = 1.7*10**(-8)
 rho_approx_molyb = 5.7*10**(-8)
 
@@ -58,7 +62,7 @@ def traitement_sinus(sinus,t) :
 
     # Trouver les zéros de la dérivée
     zeros_indices_0 = np.where(np.diff(np.sign(derivee_interp)))[0]
-    zeros_indices = [zeros_indices_0[i] for i in range(len(zeros_indices_0)-1) if float(x[zeros_indices_0[i+1]]-x[zeros_indices_0[i]])>1/2/omega]
+    zeros_indices = [zeros_indices_0[i] for i in range(len(zeros_indices_0)-1) if float(x[zeros_indices_0[i+1]]-x[zeros_indices_0[i]])>1.5/omega]
 
     # Afficher les zéros de la dérivée
     zeros_temps = x[zeros_indices]
@@ -86,8 +90,20 @@ def f_integrale(xi,rho=rho_approx_cuivre,mur=1):
     eta = (xi**2-omega**2*mu0*e0)**(1/2)
     return np.sinc(xi/(2*np.pi))**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*K(1,eta*a)**2
 
+def f_integrale_struve(xi,rho=rho_approx_cuivre,mur=1):
+    gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
+    eta = (xi**2-omega**2*mu0*e0)**(1/2)
+    l_plus = a+d/2
+    l_moins = a-d/2
+    F = (np.pi/(2*eta))*l_plus*(K(1,l_plus*eta)*L(0,l_plus*eta)+L(1,l_plus*eta)*K(0,l_plus*eta)) - (np.pi/(2*eta))*l_moins*(K(1,l_moins*eta)*L(0,l_moins*eta)+L(1,l_moins*eta)*K(0,l_moins*eta))
+    return (2/xi)**2*np.sin(l*xi/2)**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*F**2
+
 def delta_Z(x,z):
-        delta_Z = 1j*omega*mu0*a**2*n**2*quad(f_integrale, -80,80, args=(x[0],x[1],),complex_func=True,limit =100)[0]
+        delta_Z = 1j*omega*(n/d)**2*quad(f_integrale, -80,80, args=(x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
+        return (np.real(delta_Z-z),np.imag(delta_Z-z)) 
+
+def delta_Z_struve(x,z):
+        delta_Z = 1j*omega*(n/d)**2*quad(f_integrale, -300,300, args=(x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
         return (np.real(delta_Z-z),np.imag(delta_Z-z)) 
 
 
@@ -95,30 +111,26 @@ def delta_Z(x,z):
 sinus_cuivre = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_cuivre.lvm")
 sinus_molyb = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_molyb.lvm")
 sinis_calib = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_calib.lvm")
+sinus_molyb_2 = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_molyb_2.lvm")
 
 phaseurs_cuivre = phase(sinus_cuivre)
 phaseurs_molyb = phase(sinus_molyb)
 phaseurs_calib = phase(sinis_calib)
-
-z_cuivre_voulu = complex(delta_Z([rho_approx_cuivre,1],0)[0],delta_Z([rho_approx_cuivre,1],0)[0])
-  
-print(np.abs(z_cuivre_voulu),np.angle(z_cuivre_voulu))
+phaseurs_molyb_2 = phase(sinus_molyb_2)
 
 x = np.linspace(0,0.05,10000)
-
 t=np.linspace(0,0.05,100000)
 y=np.exp(1j*omega*t)
-plt.plot(t,y*phaseurs_calib[0])
+plt.plot(t,y*phaseurs_cuivre[0])
 plt.xlim([0.025,0.025+4/10000])
 
-poo = phaseurs_cuivre[0]/phaseurs_cuivre[1]
+poo = phaseurs_cuivre[0]/phaseurs_cuivre[1]/15.584
 z_cuivre = 2*(2.6030+1j*omega*555.63*10**(-6))*poo/(1-poo)
 
-poo_molyb = phaseurs_molyb[0]/phaseurs_molyb[1]
+poo_molyb = phaseurs_molyb[0]/phaseurs_molyb[1]/15.584
 z_molyb = 2*(2.5777+1j*omega*550.63*10**(-6))*poo_molyb/(1-poo_molyb)
 
-poo_calib = phaseurs_calib[0]/phaseurs_calib[1]
-z_calib = 2*(2.5777+1j*omega*550.63*10**(-6))*poo_calib/(1-poo_calib)
+poo_molyb_2 = phaseurs_molyb_2[0]/phaseurs_molyb_2[1]/15.584
+z_molyb_2 = 2*(2.5777+1j*omega*550.63*10**(-6))*poo_molyb_2/(1-poo_molyb_2)
 
-print(fsolve(delta_Z,[rho_approx_cuivre,1], args=(z_cuivre-z_calib,)))
-print(fsolve(delta_Z,[rho_approx_molyb,1], args=(z_molyb-z_calib,)))
+print(fsolve(delta_Z_struve,[rho_approx_cuivre,1],args=z_cuivre))
