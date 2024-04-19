@@ -32,7 +32,7 @@ mu0 = mu_0
 e0 = epsilon_0
 er = 1
 a = 10.43*10**(-3)/2
-n = 458
+n = 1000
 rho_approx_cuivre = 1.7*10**(-8)
 rho_approx_molyb = 5.7*10**(-8)
 
@@ -50,7 +50,7 @@ def traitement_sinus(sinus,t) :
     
     # Calculer les valeurs interpolées
     valeurs_interp = f(x)
-    plt.plot(x,valeurs_interp)
+    #plt.plot(x,valeurs_interp)
     # Calculer la dérivée numérique
     dx = x[1] - x[0]
 
@@ -58,7 +58,7 @@ def traitement_sinus(sinus,t) :
 
     # Trouver les zéros de la dérivée
     zeros_indices_0 = np.where(np.diff(np.sign(derivee_interp)))[0]
-    zeros_indices = [zeros_indices_0[i] for i in range(len(zeros_indices_0)-1) if float(x[zeros_indices_0[i+1]]-x[zeros_indices_0[i]])>0.000025]
+    zeros_indices = [zeros_indices_0[i] for i in range(len(zeros_indices_0)-1) if float(x[zeros_indices_0[i+1]]-x[zeros_indices_0[i]])>1/2/omega]
 
     # Afficher les zéros de la dérivée
     zeros_temps = x[zeros_indices]
@@ -93,8 +93,12 @@ def delta_Z(x,z):
 
 
 sinus_cuivre = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_cuivre.lvm")
-phaseurs_cuivre = phase(sinus_cuivre)
+sinus_molyb = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_molyb.lvm")
+sinis_calib = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_calib.lvm")
 
+phaseurs_cuivre = phase(sinus_cuivre)
+phaseurs_molyb = phase(sinus_molyb)
+phaseurs_calib = phase(sinis_calib)
 
 z_cuivre_voulu = complex(delta_Z([rho_approx_cuivre,1],0)[0],delta_Z([rho_approx_cuivre,1],0)[0])
   
@@ -104,14 +108,17 @@ x = np.linspace(0,0.05,10000)
 
 t=np.linspace(0,0.05,100000)
 y=np.exp(1j*omega*t)
-plt.plot(t,y*phaseurs_cuivre[0])
+plt.plot(t,y*phaseurs_calib[0])
 plt.xlim([0.025,0.025+4/10000])
-plt.show()
 
-z_cuivre = 328*phaseurs_cuivre[0]/phaseurs_cuivre[1]/15.584
+poo = phaseurs_cuivre[0]/phaseurs_cuivre[1]
+z_cuivre = 2*(2.6030+1j*omega*555.63*10**(-6))*poo/(1-poo)
 
+poo_molyb = phaseurs_molyb[0]/phaseurs_molyb[1]
+z_molyb = 2*(2.5777+1j*omega*550.63*10**(-6))*poo_molyb/(1-poo_molyb)
 
-print(np.abs(phaseurs_cuivre[0]))
-print(np.abs(z_cuivre/z_cuivre_voulu),np.angle(z_cuivre_voulu),np.angle(z_cuivre))
+poo_calib = phaseurs_calib[0]/phaseurs_calib[1]
+z_calib = 2*(2.5777+1j*omega*550.63*10**(-6))*poo_calib/(1-poo_calib)
 
-print(fsolve(delta_Z,[rho_approx_cuivre,1], args=(z_cuivre,)))
+print(fsolve(delta_Z,[rho_approx_cuivre,1], args=(z_cuivre-z_calib,)))
+print(fsolve(delta_Z,[rho_approx_molyb,1], args=(z_molyb-z_calib,)))
