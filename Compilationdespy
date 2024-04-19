@@ -414,8 +414,8 @@ if Activation_Graphique_Température_Temps == 1 :
     print('')
     print('')
 
-    fichier_entree = "Données/Temperature"
-    nom_fichier_temperature = f"Temperature_{Materiau_choisit}_ARDUINO"             
+    fichier_entree = f"Temperature_{Materiau_choisit}_ARDUINO" 
+    nom_fichier_temperature = f"Données/Temperature_{Materiau_choisit}"           
     fichier_temportaire = "Temperature_2"
 
     print('MODIFICATION DU CSV DE TEMPERATURE')
