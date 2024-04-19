@@ -27,7 +27,7 @@ print('')
 
 Activation_Production_CSV_rho = 0
 Activation_Graphique_résistivité_Température = 0
-Activation_Graphique_Température_Temps = 1
+Activation_Graphique_Température_Temps = 0
 
 
 if Activation_Production_CSV_rho == 1 :
@@ -52,16 +52,21 @@ print('')
 print('')
 #----------------- Modification generales DEBUT
 
+#CODE 1
+if Activation_Production_CSV_rho == 1 :
+    Nom_materiau_utilisé = "Données_cuivre"
+
+#CODE 2
 if Activation_Graphique_résistivité_Température == 1 :  
     #Nombre de lignes - 1 du fichier de temperature
     nombre_lignes_conservees = 31
+    Nom_materiau_utilisé = "Données_cuivre"
 
+#CODE 3
 if Activation_Graphique_Température_Temps == 1 :
     fichier_entree = "Données/Temperature"
-    Materiau_choisit = 'Invar36'
+    Materiau_choisit = 'Cuivre'
 
-if Activation_Production_CSV_rho == 1 :
-    Nom_materiau_utilisé = "Données_cuivre"
 
 #Cuivre :
 b=1.58*10**(-3)
@@ -215,7 +220,7 @@ if Activation_Graphique_résistivité_Température == 1 :
     #Modifications pour les CSV ------------------------------------------------------------------------------------------------------   
 
     fichier_entree = "Données/Temperature_palier"
-    fichier_entree2 = "300_valeurs_de_rho"
+    fichier_entree2 = f"300_valeurs_de_rho_{Nom_materiau_utilisé}"
     fichier_temportaire = "Temperature_2"
     fichier_temportaire2 = "Temperature_3"
     fichier_entree_3 = "Resistivite3"
