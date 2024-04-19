@@ -16,32 +16,40 @@ from scipy.special import iv as I
 from scipy.special import kv as K
 from scipy.optimize import fsolve
 
+print('')
+print('')
 print('#----------------- Menu d\'activation des programmes DEBUT')
+print('')
+print('')
+
 # 1 = on
 # 0 = off
 
-Activation_Production_CSV_rho = 0
+Activation_Production_CSV_rho = 1
 Activation_Graphique_résistivité_Température = 1
-Activation_Graphique_Température_Temps = 0
+Activation_Graphique_Température_Temps = 1
 
 
 if Activation_Production_CSV_rho == 1 :
-    print('Activation_Production_CSV_rho : on')
+    print('Activation_Production_CSV_rho','|','on')
 else :
-    print('Activation_Production_CSV_rho : off')
+    print('Activation_Production_CSV_rho','|','off')
 
 if Activation_Graphique_résistivité_Température == 1 :
-    print('Activation_Graphique_Resistivite_Temperature : on')
+    print('Activation_Graphique_Resistivite_Temperature','|','on')
 else :
-    print('Activation_Graphique_Resistivite_Temperature : off')
+    print('Activation_Graphique_Resistivite_Temperature','|','off')
 
 if Activation_Graphique_Température_Temps == 1 :
-    print('Activation_Graphique_Température_Temps : on')
+    print('Activation_Graphique_Température_Temps','|' , 'on')
 else :
-    print('Activation_Graphique_Température_Temps : off')
+    print('Activation_Graphique_Température_Temps','|' , 'off')
 
+print('')
+print('')
 print('#----------------- Menu d\'activation des programmes FIN')
-
+print('')
+print('')
 #----------------- Modification generales DEBUT
 
 if Activation_Graphique_résistivité_Température == 1 :  
@@ -180,15 +188,24 @@ def list_to_csv(input_list, file_name):
             writer.writerow([row])
 
 #fonctions FIN ---------------------------------------------------------------------------------------------------------------
+if Activation_Production_CSV_rho == 1 :
+    print('')
+    print('#CODE 1 DEBUT ---------------------------------------------------------------------------------------------------------------')
+    print('')
+    print('')
 
-print('#CODE 1 DEBUT ---------------------------------------------------------------------------------------------------------------')
 
+    print('')
+    print('')
+    print('#CODE 1 FIN ---------------------------------------------------------------------------------------------------------------')
 
-print('#CODE 1 FIN ---------------------------------------------------------------------------------------------------------------')
-
-print('#CODE 2 DEBUT ---------------------------------------------------------------------------------------------------------------')
 
 if Activation_Graphique_résistivité_Température == 1 :
+    print('')
+    print('#CODE 2 DEBUT ---------------------------------------------------------------------------------------------------------------')
+    print('')
+    print('')
+
     #Nom des fichiers ---------------------------------------------------------------------------------------------------------------   
 
     nom_fichier_temperature = "Temperature_fini_PALIER"             
@@ -241,12 +258,16 @@ if Activation_Graphique_résistivité_Température == 1 :
 
     #-------------------------------------------------------------------------------------------------------------------------------------------------
 
-
-print('#CODE 2 FIN ---------------------------------------------------------------------------------------------------------------')
-
-print('#CODE 3 DEBUT -------------------------------------------------------------------------------------------------------------')
+    print('')
+    print('')
+    print('#CODE 2 FIN ---------------------------------------------------------------------------------------------------------------')
 
 if Activation_Graphique_Température_Temps == 1 :
+    print('')
+    print('#CODE 3 DEBUT -------------------------------------------------------------------------------------------------------------')
+    print('')
+    print('')
+    
     fichier_entree = "Données/Temperature"
     nom_fichier_temperature = f"Temperature_{Materiau_choisit}_ARDUINO"             
     fichier_temportaire = "Temperature_2"
@@ -272,5 +293,6 @@ if Activation_Graphique_Température_Temps == 1 :
     plt.grid(True)  
     plt.show() 
 
-
-print('#CODE 3 FIN ---------------------------------------------------------------------------------------------------------------')
+    print('')
+    print('')
+    print('#CODE 3 FIN ---------------------------------------------------------------------------------------------------------------')
