@@ -25,8 +25,8 @@ print('')
 # 1 = on
 # 0 = off
 
-Activation_Production_CSV_rho = 1
-Activation_Graphique_résistivité_Température = 1
+Activation_Production_CSV_rho = 0
+Activation_Graphique_résistivité_Température = 0
 Activation_Graphique_Température_Temps = 1
 
 
@@ -267,7 +267,7 @@ if Activation_Graphique_Température_Temps == 1 :
     print('#CODE 3 DEBUT -------------------------------------------------------------------------------------------------------------')
     print('')
     print('')
-    
+
     fichier_entree = "Données/Temperature"
     nom_fichier_temperature = f"Temperature_{Materiau_choisit}_ARDUINO"             
     fichier_temportaire = "Temperature_2"
