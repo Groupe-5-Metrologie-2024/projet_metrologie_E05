@@ -27,7 +27,7 @@ print('')
 
 Activation_Production_CSV_rho = 0
 Activation_Graphique_résistivité_Température = 0
-Activation_Graphique_Température_Temps = 0
+Activation_Graphique_Température_Temps = 1
 
 
 if Activation_Production_CSV_rho == 1 :
@@ -90,7 +90,7 @@ rho_approx_invar36 = 8.2*10**(-8)
 #fonctions DEBUT ---------------------------------------------------------------------------------------------------------------
 
 def ouverture_fichier(nomfichier):
-    with open(nomfichier, 'r') as csvfile:
+    with open(nomfichier, 'r', encoding='latin1') as csvfile:
         csvreader = csv.reader(csvfile)
         xc = []
         i = 0
@@ -136,7 +136,7 @@ def conserver_premieres_lignes(fichier_entree, nombre_lignes_conservees, fichier
 
 def modifier_virgule_csv(fichier_entree, fichier_sortie):
 
-    with open(fichier_entree, 'r', newline='') as csv_entree, open(fichier_sortie, 'w', newline='') as csv_sortie:
+    with open(fichier_entree, 'r', newline='', encoding='latin1') as csv_entree, open(fichier_sortie, 'w', newline='') as csv_sortie:
         lecteur_csv = csv.reader(csv_entree)
         ecrivain_csv = csv.writer(csv_sortie)
         
@@ -168,7 +168,7 @@ def supprimer_fichier(fichier):
 
 def supprimer_premiere_ligne(fichier_entree, fichier_sortie):
     lignes_restantes = []
-    with open(fichier_entree, 'r', newline='') as csv_entree:
+    with open(fichier_entree, 'r', newline='', encoding='latin1') as csv_entree:
         lecteur_csv = csv.reader(csv_entree)
         # Ignorer la première ligne
         next(lecteur_csv)
