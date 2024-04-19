@@ -20,9 +20,9 @@ print('#----------------- Menu d\'activation des programmes DEBUT')
 # 1 = on
 # 0 = off
 
-Activation_Production_CSV_rho = 1
+Activation_Production_CSV_rho = 0
 Activation_Graphique_résistivité_Température = 1
-Activation_Graphique_Température_Temps = 1
+Activation_Graphique_Température_Temps = 0
 
 
 if Activation_Production_CSV_rho == 1 :
@@ -178,7 +178,6 @@ def list_to_csv(input_list, file_name):
         writer = csv.writer(csvfile)
         for row in input_list:
             writer.writerow([row])
-
 
 #fonctions FIN ---------------------------------------------------------------------------------------------------------------
 
