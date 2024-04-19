@@ -14,13 +14,16 @@ def analyse_donnees(nomfichier):
         csvreader = csv.reader(csvfile)
         x_1 = []
         x_2 = []
+        t = []
         i = 0
         for i in range(23):
             next(csvreader)
         for row in csvreader:
             x_1.append(float(row[1]))
-            x_2.append(float(row[3]))
-    return [x_1,x_2]
+            x_2.append(float(row[2]))
+            t.append(float(row[0]))
+    return [x_1,x_2,t]
+
 
 #Cuivre
 b = 1.59*10**(-3)
@@ -33,17 +36,17 @@ n = 458
 rho_approx_cuivre = 1.7*10**(-8)
 rho_approx_molyb = 5.7*10**(-8)
 
-def traitement_sinus(sinus) :
+def traitement_sinus(sinus,t) :
     # Générer une liste de valeurs de sinus pour la première fonction
     A = sinus
 
-    T = np.linspace(0,0.05, len(A))
+    T = t
 
     # Créer une fonction d'interpolation
     f = interp1d(T, A, kind='cubic')
 #   
     # Générer une plage de temps pour évaluer la fonction
-    x=np.linspace(0,0.05,100000)
+    x=np.linspace(0,t[len(t)-1],len(t)*10)
     
     # Calculer les valeurs interpolées
     valeurs_interp = f(x)
@@ -65,8 +68,8 @@ def traitement_sinus(sinus) :
 
 def phase(output):
     phaseurs = []
-    for i in range(len(output)):
-        Valeurs, temps = traitement_sinus(output[i])
+    for i in range(len(output)-1):
+        Valeurs, temps = traitement_sinus(output[i],output[2])
         max = [l for l in Valeurs if l>0]
         min = [l for l in Valeurs if l<0]
         voltage = (sum(max)/len(max)-sum(min)/len(min))/2
@@ -88,11 +91,9 @@ def delta_Z(x,z):
         return (np.real(delta_Z-z),np.imag(delta_Z-z)) 
 
 
-sinus_solenoide_cuivre = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_cuivre.lvm")[0]
-sinus_resistance_cuivre = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_cuivre.lvm")[1]
 
-
-phaseurs_cuivre = phase([sinus_solenoide_cuivre,sinus_resistance_cuivre])
+sinus_cuivre = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_cuivre.lvm")
+phaseurs_cuivre = phase(sinus_cuivre)
 
 
 z_cuivre_voulu = complex(delta_Z([rho_approx_cuivre,1],0)[0],delta_Z([rho_approx_cuivre,1],0)[0])
@@ -100,13 +101,17 @@ z_cuivre_voulu = complex(delta_Z([rho_approx_cuivre,1],0)[0],delta_Z([rho_approx
 print(np.abs(z_cuivre_voulu),np.angle(z_cuivre_voulu))
 
 x = np.linspace(0,0.05,10000)
-plt.scatter(x,sinus_solenoide_cuivre)
+
 t=np.linspace(0,0.05,100000)
 y=np.exp(1j*omega*t)
-plt.plot(t,y*phaseurs_cuivre[1])
+plt.plot(t,y*phaseurs_cuivre[0])
 plt.xlim([0.025,0.025+4/10000])
 plt.show()
 
 z_cuivre = 328*phaseurs_cuivre[0]/phaseurs_cuivre[1]/15.584
+
+
+print(np.abs(phaseurs_cuivre[0]))
+print(np.abs(z_cuivre/z_cuivre_voulu),np.angle(z_cuivre_voulu),np.angle(z_cuivre))
 
 print(fsolve(delta_Z,[rho_approx_cuivre,1], args=(z_cuivre,)))
