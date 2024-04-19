@@ -68,20 +68,21 @@ if Activation_Graphique_Température_Temps == 1 :
     Materiau_choisit = 'Cuivre'
 
 
-#Cuivre :
-b=1.58*10**(-3)
-omega=2*np.pi*100*10**3
-mur=1
-mu0=mu_0
-e0=epsilon_0
-er=1
-a=10.43*10**(-3)
-n=1
-rho_approx=820*10**(-9)
+#Cuivre
+b = 1.59*10**(-3)
+omega = 2*np.pi*10**4
+mu0 = mu_0
+e0 = epsilon_0
+er = 1
+a = 10.43*10**(-3)/2
+n = 458
+rho_approx_cuivre = 1.7*10**(-8)
 
-#Molybdene :
+#Molyb
+rho_approx_molyb = 5.7*10**(-8)
 
-#Invar36 :
+#Invar36
+rho_approx_invar36 = 8.2*10**(-8)
 
 #----------------- Modification generales FIN
 
@@ -192,6 +193,141 @@ def list_to_csv(input_list, file_name):
         for row in input_list:
             writer.writerow([row])
 
+def traitement_sinus(sinus,t) :
+    # Générer une liste de valeurs de sinus pour la première fonction
+    A = sinus
+
+    T = t
+
+    # Créer une fonction d'interpolation
+    f = interp1d(T, A, kind='cubic')
+#   
+    # Générer une plage de temps pour évaluer la fonction
+    x=np.linspace(0,t[len(t)-1],len(t)*10)
+    
+    # Calculer les valeurs interpolées
+    valeurs_interp = f(x)
+    # Calculer la dérivée numérique
+    dx = x[1] - x[0]
+
+    derivee_interp = np.gradient(valeurs_interp, dx)
+
+    # Trouver les zéros de la dérivée
+    zeros_indices_0 = np.where(np.diff(np.sign(derivee_interp)))[0]
+    zeros_indices = [zeros_indices_0[i] for i in range(len(zeros_indices_0)-1) if float(x[zeros_indices_0[i+1]]-x[zeros_indices_0[i]])>0.000025]
+
+    # Afficher les zéros de la dérivée
+    zeros_temps = x[zeros_indices]
+    zeros_valeurs = valeurs_interp[zeros_indices]
+    
+    return zeros_valeurs,zeros_temps
+
+def phase(output):
+    phaseurs = []
+    for i in range(len(output)-1):
+        Valeurs, temps = traitement_sinus(output[i],output[2])
+        max = [l for l in Valeurs if l>0]
+        min = [l for l in Valeurs if l<0]
+        voltage = (sum(max)/len(max)-sum(min)/len(min))/2
+
+        t = list(Valeurs).index(max[int(len(max)/2)])
+        dephasage = temps[t]
+        phaseur = voltage*np.exp(-1j*omega*dephasage)      
+        phaseurs.append(phaseur)
+    return phaseurs
+
+def f_re(xi,rho):
+    gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
+    eta = (xi**2-omega**2*mu0*e0)**(1/2)
+    return np.real(np.sinc(xi/2)**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*K(1,eta*a)**2)
+
+def f_im(xi,rho):
+    gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
+    eta = (xi**2-omega**2*mu0*e0)**(1/2)
+    return np.imag(np.sinc(xi/2)**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*K(1,eta*a)**2)
+
+def delta_R(rho,z):
+    return -omega*mu0*a**2*n**2*(quad(f_im, -40,40, args=(rho,))[0])-np.real(z)
+
+def delta_X(rho,z):
+    return omega*mu0*a**2*n**2*(quad(f_re, -40,40, args=(rho,))[0])-np.imag(z)
+
+def solve_z(z):
+    i=0
+    while True:
+        x = fsolve(delta_R, [10**(-10+i)],args = (z,))
+        y = fsolve(delta_X,x,args = (z,))
+        if np.isclose(x,y):
+            return x
+        else:
+            i+=1
+
+def f_integrale(xi,rho=rho_approx_cuivre,mur=1):
+    gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
+    eta = (xi**2-omega**2*mu0*e0)**(1/2)
+    return np.sinc(xi/(2*np.pi))**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*K(1,eta*a)**2
+
+def delta_Z(x,z):
+        delta_Z = 1j*omega*mu0*a**2*n**2*quad(f_integrale, -80,80, args=(x[0],x[1],),complex_func=True,limit =100)[0]
+        return (np.real(delta_Z-z),np.imag(delta_Z-z)) 
+
+def analyse_donnees(nomfichier):
+    with open(nomfichier, 'r') as csvfile:
+        csvreader = csv.reader(csvfile)
+        x_1 = []
+        x_2 = []
+        t = []
+        i = 0
+        for i in range(23):
+            next(csvreader)
+        for row in csvreader:
+            x_1.append(float(row[1]))
+            x_2.append(float(row[2]))
+            t.append(float(row[0]))
+    return [x_1,x_2,t]
+
+def list_to_csv(input_list, file_name):
+
+    # Obtenir le chemin du dossier actuel
+    current_directory = os.getcwd()
+    # Combiner le chemin du dossier avec le nom du fichier
+    file_path = os.path.join(current_directory, file_name)
+    
+    with open(file_path, 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        for row in input_list:
+            writer.writerow([row])
+
+def TOTAL(Materiau):
+    rho = []
+    for i in range(1, 32):
+        print(f'Utilisation du fichier {Materiau} numero ',i)
+        try:
+            nom_fichier = f"Données/{Materiau}_{i}.lvm"
+
+            sinus = analyse_donnees(nom_fichier)
+            phaseurs = phase(sinus)
+
+            z = 328*phaseurs[0]/phaseurs[1]/15.584                                        
+
+            if Materiau == "Données_cuivre" :
+                rho_i = fsolve(delta_Z,[rho_approx_cuivre,1], args=(z,))[0]
+            elif Materiau == "Données_molyb" :
+                rho_i = fsolve(delta_Z,[rho_approx_molyb,1], args=(z,))[0]
+            elif Materiau == "Données_invar36" :
+                rho_i = fsolve(delta_Z,[rho_approx_invar36,1], args=(z,))[0]
+            
+            rho.append(rho_i)
+
+            if i == 31 :
+                print('fin des calculs')
+            
+        except:
+            print('Erreur')
+            break
+
+    return rho
+
 #fonctions FIN ---------------------------------------------------------------------------------------------------------------
 if Activation_Production_CSV_rho == 1 :
     print('')
@@ -199,6 +335,11 @@ if Activation_Production_CSV_rho == 1 :
     print('')
     print('')
 
+
+    rho_f = TOTAL(Nom_materiau_utilisé)
+
+    print('production du csv')
+    list_to_csv(rho_f,f'300_valeurs_de_rho_{Nom_materiau_utilisé}')
 
     print('')
     print('')
