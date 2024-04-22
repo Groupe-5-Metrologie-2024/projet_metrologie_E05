@@ -27,18 +27,19 @@ def analyse_donnees(nomfichier):
 
 
 #Cuivre
-b = 1.59*10**(-3)
+b = 3.16e-3/2
 omega = 2*np.pi*10**4
 mu0 = mu_0
 e0 = epsilon_0
 er = 1
-d = 15.75*10**(-3)/2-(9.78*10**(-3)/2+1*10**(-3))
-n = 458
-a = 15.75*10**(-3)/2-d/2
-l=50.15*10**(-3)-2.02*10**(-3)-2.08*10**(-3)
+d = 15.62e-3/2-(9.84e-3/2+1e-3)
+n=448
+a = 15.62e-3/2-d/2
+l=45.05e-3
 
 rho_approx_cuivre = 1.7*10**(-8)
-rho_approx_molyb = 5.7*10**(-8)
+rho_approx_molyb = 5*10**(-8)
+rho_approx_invar = 8.2*10**(-7)
 
 def traitement_sinus(sinus,t) :
     # Générer une liste de valeurs de sinus pour la première fonction
@@ -79,7 +80,6 @@ def phase(output):
         voltage = (sum(max)/len(max)-sum(min)/len(min))/2
 
         t = list(Valeurs).index(max[int(len(max)/2)])
-        plt.scatter(temps,Valeurs)
         dephasage = temps[t]
         phaseur = voltage*np.exp(-1j*omega*dephasage)      
         phaseurs.append(phaseur)
@@ -88,7 +88,7 @@ def phase(output):
 def f_integrale(xi,rho=rho_approx_cuivre,mur=1):
     gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
     eta = (xi**2-omega**2*mu0*e0)**(1/2)
-    return np.sinc(xi/(2*np.pi))**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*K(1,eta*a)**2
+    return np.sinc(xi*l/(2*np.pi))**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*K(1,eta*a)**2
 
 def f_integrale_struve(xi,rho=rho_approx_cuivre,mur=1):
     gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
@@ -99,38 +99,44 @@ def f_integrale_struve(xi,rho=rho_approx_cuivre,mur=1):
     return (2/xi)**2*np.sin(l*xi/2)**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*F**2
 
 def delta_Z(x,z):
-        delta_Z = 1j*omega*(n/d)**2*quad(f_integrale, -80,80, args=(x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
+        delta_Z = 1j*omega*mu0*a**2*n**2*quad(f_integrale, -80,80, args=(x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
         return (np.real(delta_Z-z),np.imag(delta_Z-z)) 
 
 def delta_Z_struve(x,z):
-        delta_Z = 1j*omega*(n/d)**2*quad(f_integrale, -300,300, args=(x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
+        delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve, 0,300, args=(x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
         return (np.real(delta_Z-z),np.imag(delta_Z-z)) 
 
+z1 = 2.5398+1j*omega*549.03e-6
+zcuivre = 2.5698+1j*omega*548.16e-6
+zmolyb = 2.5516+1j*omega*548.94e-6
+zinvar = 2.5529 + 1j*omega*568.46e-6
+zinvar_sans_aimant = 9.4555 + 1j*omega*3.1918e-3
 
+z2 = 2.5912+1j*omega*548.94e-6
+zcuivre_2= 2.6226+1j*omega*548.07e-6
+zmolyb_2 = 2.6058 +1j*548.82e-6
+zinvar_sans_aimant_2 = 9.5560+ 1j*3.2021e-3*omega
+zinvar_2 = 2.6107+1j*omega*574.96e-6
 
-sinus_cuivre = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_cuivre.lvm")
-sinus_molyb = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_molyb.lvm")
-sinis_calib = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_calib.lvm")
-sinus_molyb_2 = analyse_donnees("C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_molyb_2.lvm")
+sinus_cuivre = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_cuivre.lvm")
+sinus_calib = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_calib.lvm")
+sinus_molyb = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_molyb.lvm")
+sinus_invar = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_invar.lvm")
+sinus_calib_2 = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_calib_2.lvm")
+
+phaseurs_calib = phase(sinus_calib)
 
 phaseurs_cuivre = phase(sinus_cuivre)
+poo_cuivre = -(phaseurs_cuivre[0])/phaseurs_cuivre[1]/15.32
+
 phaseurs_molyb = phase(sinus_molyb)
-phaseurs_calib = phase(sinis_calib)
-phaseurs_molyb_2 = phase(sinus_molyb_2)
+poo_molyb = -(phaseurs_molyb[0])/phaseurs_molyb[1]/15.32
 
-x = np.linspace(0,0.05,10000)
-t=np.linspace(0,0.05,100000)
-y=np.exp(1j*omega*t)
-plt.plot(t,y*phaseurs_cuivre[0])
-plt.xlim([0.025,0.025+4/10000])
+phaseurs_invar = phase(sinus_invar)
+poo_invar = -(phaseurs_invar[0])/phaseurs_invar[1]/3
 
-poo = phaseurs_cuivre[0]/phaseurs_cuivre[1]/15.584
-z_cuivre = 2*(2.6030+1j*omega*555.63*10**(-6))*poo/(1-poo)
+z_invar = 2*(1j*omega*550.63e-6)*poo_invar/(1-poo_invar)
+z_cuivre = 2*(2.53e-2+1j*omega*550.63e-6)*poo_cuivre/(1-poo_cuivre)
+z_molyb = 2*(2.53e-2+1j*omega*550.63e-6)*poo_molyb/(1-poo_molyb)
 
-poo_molyb = phaseurs_molyb[0]/phaseurs_molyb[1]/15.584
-z_molyb = 2*(2.5777+1j*omega*550.63*10**(-6))*poo_molyb/(1-poo_molyb)
-
-poo_molyb_2 = phaseurs_molyb_2[0]/phaseurs_molyb_2[1]/15.584
-z_molyb_2 = 2*(2.5777+1j*omega*550.63*10**(-6))*poo_molyb_2/(1-poo_molyb_2)
-
-print(fsolve(delta_Z_struve,[rho_approx_cuivre,1],args=z_cuivre))
+print(fsolve(delta_Z_struve,[rho_approx_cuivre,1],args = (z_cuivre)))
