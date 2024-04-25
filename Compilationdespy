@@ -70,13 +70,13 @@ if Activation_Production_CSV_rho == 1 :
 #CODE 2
 if Activation_Graphique_résistivité_Température == 1 :  
     #Nombre de lignes - 1 du fichier de temperature
-    nombre_lignes_conservees = 104
+    nombre_lignes_conservees = 103
     Nom_materiau_utilisé = "Données_cuivre"
 
 #CODE 3
 if Activation_Graphique_Température_Temps == 1 :
     fichier_entree = "Données/Temperature"
-    Materiau_choisit = 'Cuivre'
+    Materiau_choisit = 'cuivre'
 
 
 
@@ -87,7 +87,7 @@ mu0 = mu_0
 e0 = epsilon_0
 er = 1
 d = 15.62e-3/2-(9.84e-3/2+1e-3)
-n=448
+n=456
 a = 15.62e-3/2-d/2
 l=45.05e-3
 
@@ -342,7 +342,7 @@ def delta_Z(x,z):
         return (np.real(delta_Z-z),np.imag(delta_Z-z)) 
 
 def delta_Z_struve(x,z):
-        delta_Z = 1j*omega*(n/d)**2*mu0*quad(f_integrale_struve, -300,300, args=(x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
+        delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve, 0,300, args=(x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
         return (np.real(delta_Z-z),np.imag(delta_Z-z)) 
 
 def TOTAL(Materiau):
@@ -358,12 +358,12 @@ def TOTAL(Materiau):
        
             phaseurs = phase(sinus)
 
-            poo = -(phaseurs[0])/phaseurs[1]/3
+            poo = - (phaseurs[0])/phaseurs[1]/3
         
             z_cuivre = 2*(2.5777+1j*omega*550.63e-6)*poo/(1-poo)
             
      
-            resultat = fsolve(delta_Z_struve,[rho_approx_cuivre,1],args = (z_cuivre))
+            resultat = fsolve(delta_Z_struve,[rho_approx_cuivre,1],args = - (z_cuivre))
 
   
             rho_i = resultat[0]  
@@ -374,7 +374,7 @@ def TOTAL(Materiau):
       
             rho.append(rho_i)
         
-            if i == 23 :
+            if i == 104 :
                 print('fin des calculs')
             
         except:
@@ -452,6 +452,7 @@ if Activation_Graphique_résistivité_Température == 1 :
 
     plt.plot(x, y)  
     plt.xlim([24,50])
+    plt.ylim([0,3*10**(-8)])
     plt.xlabel('Température')  
     plt.ylabel('Résistivité')  
     plt.title('Graphique de la résistivite de l\'echantillon en fonction de la temperature')  

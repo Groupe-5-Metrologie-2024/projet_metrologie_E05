@@ -1,59 +1,27 @@
-/*************************************************** 
-  This is a library for the Adafruit PT100/P1000 RTD Sensor w/MAX31865
-
-  Designed specifically to work with the Adafruit RTD Sensor
-  ----> https://www.adafruit.com/products/3328
-
-  This sensor uses SPI to communicate, 4 pins are required to  
-  interface
-  Adafruit invests time and resources providing this open source code, 
-  please support Adafruit and open-source hardware by purchasing 
-  products from Adafruit!
-
-***********Modified on Feb 25 2024
-***********Serial print some info and displays temperature in Celsius on Grove 16x2 i2c display
- ****************************************************/
-
 #include <Adafruit_MAX31865.h>
 #include <Wire.h>
-//#include "rgb_lcd.h" // library is located at  https://github.com/Seeed-Studio/Grove_LCD_RGB_Backlight
 
-// Use software SPI: CS, DI, DO, CLK
 Adafruit_MAX31865 thermo = Adafruit_MAX31865(10, 11, 12, 13);
-// use hardware SPI, just pass in the CS pin
-//Adafruit_MAX31865 thermo = Adafruit_MAX31865(10);
 
-// The value of the Rref resistor. Use 430.0 for PT100 and 4300.0 for PT1000
 #define RREF      430.0
-// The 'nominal' 0-degrees-C resistance of the sensor
-// 100.0 for PT100, 1000.0 for PT1000
 #define RNOMINAL  100.0
-//rgb_lcd lcd;
+
+bool temperatureEndsWithQuarter = false;
 
 void setup() {
   Serial.begin(115200);
-  //lcd.begin(16, 2);
   Serial.println("Début de la prise de température");
-  thermo.begin(MAX31865_3WIRE);  // set to 2WIRE or 4WIRE as necessary
-
+  thermo.begin(MAX31865_3WIRE);
 }
-
 
 void loop() {
   uint16_t rtd = thermo.readRTD();
 
+  float temperature = thermo.temperature(RNOMINAL, RREF);
+  Serial.println(temperature);
 
-  //Serial.print("RTD value: "); Serial.println(rtd);
- // float ratio = rtd;
- // ratio /= 32768;
- // Serial.print("Ratio = "); Serial.println(ratio,8);
-  //Serial.print("Resistance = "); Serial.println(RREF*ratio,8);
+  updateTemperatureEndsWithQuarter(temperature);
 
-  
-  //Temperature
-  Serial.println(thermo.temperature(RNOMINAL, RREF));
-
-  // Check and print any faults
   uint8_t fault = thermo.readFault();
   if (fault) {
     Serial.print("Fault 0x"); Serial.println(fault, HEX);
@@ -78,4 +46,13 @@ void loop() {
     thermo.clearFault();
   }
   delay(10);
+}
+
+void updateTemperatureEndsWithQuarter(float temperature) {
+  float diff = temperature - int(temperature); // Get the decimal part of the temperature
+  if (diff == 0.00 || diff == 0.25 || diff == 0.50 || diff == 0.75) {
+    temperatureEndsWithQuarter = true;
+  } else {
+    temperatureEndsWithQuarter = false;
+  }
 }

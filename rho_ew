@@ -27,13 +27,13 @@ def analyse_donnees(nomfichier):
 
 
 #Cuivre
-omega = 2*np.pi*10**4
 b = 3.16e-3/2
+omega = 2*np.pi*10**4
 mu0 = mu_0
 e0 = epsilon_0
 er = 1
 d = 15.62e-3/2-(9.84e-3/2+1e-3)
-n=448
+n=456
 a = 15.62e-3/2-d/2
 l=45.05e-3
 
@@ -118,10 +118,25 @@ zmolyb_2 = 2.6058 +1j*548.82e-6
 zinvar_sans_aimant_2 = 9.5560+ 1j*3.2021e-3*omega
 zinvar_2 = 2.6107+1j*omega*574.96e-6
 
+sinus_cuivre = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_cuivre.lvm")
+sinus_calib = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_calib.lvm")
+sinus_molyb = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_molyb.lvm")
+sinus_invar = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_invar.lvm")
+sinus_calib_2 = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_calib_2.lvm")
 
-sinus_cuivre = analyse_donnees(f"")
+phaseurs_calib = phase(sinus_calib)
+
 phaseurs_cuivre = phase(sinus_cuivre)
 poo_cuivre = -(phaseurs_cuivre[0])/phaseurs_cuivre[1]/15.32
+
+phaseurs_molyb = phase(sinus_molyb)
+poo_molyb = -(phaseurs_molyb[0])/phaseurs_molyb[1]/15.32
+
+phaseurs_invar = phase(sinus_invar)
+poo_invar = -(phaseurs_invar[0])/phaseurs_invar[1]/3
+
+z_invar = 2*(1j*omega*550.63e-6)*poo_invar/(1-poo_invar)
 z_cuivre = 2*(2.53e-2+1j*omega*550.63e-6)*poo_cuivre/(1-poo_cuivre)
+z_molyb = 2*(2.53e-2+1j*omega*550.63e-6)*poo_molyb/(1-poo_molyb)
 
 print(fsolve(delta_Z_struve,[rho_approx_cuivre,1],args = (z_cuivre)))
