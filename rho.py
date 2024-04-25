@@ -33,7 +33,7 @@ mu0 = mu_0
 e0 = epsilon_0
 er = 1
 d = 15.62e-3/2-(9.84e-3/2+1e-3)
-n=448
+n=456
 a = 15.62e-3/2-d/2
 l=45.05e-3
 
@@ -84,7 +84,7 @@ def phase(output):
         phaseur = voltage*np.exp(-1j*omega*dephasage)      
         phaseurs.append(phaseur)
     return phaseurs
-
+     
 def f_integrale(xi,rho=rho_approx_cuivre,mur=1):
     gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
     eta = (xi**2-omega**2*mu0*e0)**(1/2)
@@ -118,11 +118,17 @@ zmolyb_2 = 2.6058 +1j*548.82e-6
 zinvar_sans_aimant_2 = 9.5560+ 1j*3.2021e-3*omega
 zinvar_2 = 2.6107+1j*omega*574.96e-6
 
-sinus_cuivre = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_cuivre.lvm")
+sinus_cuivre = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_cuivre_10000.lvm")
 sinus_calib = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_calib.lvm")
 sinus_molyb = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_molyb.lvm")
 sinus_invar = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_invar.lvm")
 sinus_calib_2 = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_calib_2.lvm")
+
+plt.scatter(sinus_cuivre[2],sinus_cuivre[0])
+plt.xlim(max(sinus_cuivre[2])/2,max(sinus_cuivre[2])/2+2*np.pi/omega*4)
+plt.show()
+
+z_calib = z2-z1
 
 phaseurs_calib = phase(sinus_calib)
 
@@ -135,8 +141,9 @@ poo_molyb = -(phaseurs_molyb[0])/phaseurs_molyb[1]/15.32
 phaseurs_invar = phase(sinus_invar)
 poo_invar = -(phaseurs_invar[0])/phaseurs_invar[1]/3
 
-z_invar = 2*(1j*omega*550.63e-6)*poo_invar/(1-poo_invar)
-z_cuivre = 2*(2.53e-2+1j*omega*550.63e-6)*poo_cuivre/(1-poo_cuivre)
-z_molyb = 2*(2.53e-2+1j*omega*550.63e-6)*poo_molyb/(1-poo_molyb)
+z_invar = 2*(1j*omega*550.63e-6)*poo_invar/(1-poo_invar)+z_calib
+z_cuivre = 2*(2.5777+1j*omega*550.63e-6)*poo_cuivre/(1-poo_cuivre)+z_calib
+z_molyb = 2*(2.53e-2+1j*omega*550.63e-6)*poo_molyb/(1-poo_molyb)+z_calib
 
-print(fsolve(delta_Z_struve,[rho_approx_cuivre,1],args = (z_cuivre)))
+x = fsolve(delta_Z_struve,[rho_approx_cuivre,1],args = (z_cuivre))[0]
+print(x)
