@@ -50,8 +50,12 @@ void loop() {
 
 void updateTemperatureEndsWithQuarter(float temperature) {
   float diff = temperature - int(temperature); // Get the decimal part of the temperature
-  if (diff == 0.00 || diff == 0.25 || diff == 0.50 || diff == 0.75) {
-    temperatureEndsWithQuarter = true;
+  if (temperature >= 24 && temperature <= 50) {
+    if (diff == 0.00 || diff == 0.25 || diff == 0.50 || diff == 0.75) {
+      temperatureEndsWithQuarter = true;
+    } else {
+      temperatureEndsWithQuarter = false;
+    }
   } else {
     temperatureEndsWithQuarter = false;
   }
