@@ -1,11 +1,9 @@
 #Modules ---------------------------------------------------------------------------------------------------------------
-
 import csv
 import matplotlib.pyplot as plt
 import statistics as stat
 import scipy
 import numpy as np
-from scipy.special import kv, iv
 import os
 import time
 from scipy.interpolate import interp1d
@@ -14,29 +12,8 @@ from scipy.constants import epsilon_0
 from scipy.integrate import quad
 from scipy.special import iv as I
 from scipy.special import kv as K
-from scipy.optimize import fsolve
-from scipy.constants import mu_0
-from scipy.constants import epsilon_0
-import numpy as np
-from scipy.integrate import quad
-from scipy.special import iv as I
-from scipy.special import kv as K
-import matplotlib.pyplot as plt
-from scipy.optimize import fsolve
-import csv
-from scipy.interpolate import interp1d
 from scipy.special import modstruve as L
-from scipy.constants import mu_0
-from scipy.constants import epsilon_0
-import numpy as np
-from scipy.integrate import quad
-from scipy.special import iv as I
-from scipy.special import kv as K
-import matplotlib.pyplot as plt
 from scipy.optimize import fsolve,curve_fit
-import csv
-from scipy.interpolate import interp1d
-from scipy.special import modstruve as L
 
 print('')
 print('')
@@ -373,6 +350,7 @@ def TOTAL(Materiau):
     try :
         if Materiau == "invar":
             for i in range(1,50):
+                print(f'Calcul sur le fichier {i} en cours...')
                 sinus_molyb = analyse_donnees(f"Données/Données_invar_{i}.lvm")
                 traité = phase(sinus_molyb)
                 phaseurs_molyb = traité[0]
@@ -393,6 +371,7 @@ def TOTAL(Materiau):
             res = [(y[i]-y_fit[i])/err[i] for i in range(len(x))]
         
         elif Materiau == "Cuivre":
+            print(f'Calcul sur le fichier {i} en cours...')
             for i in range(1,50):
                 sinus_molyb = analyse_donnees(f"Données/Données_cuivre_{i}.lvm")
                 traité = phase(sinus_molyb)
@@ -415,6 +394,7 @@ def TOTAL(Materiau):
             res = [(y[i]-y_fit[i])/err[i] for i in range(len(x))]
         
         elif Materiau == "Molyb":
+            print(f'Calcul sur le fichier {i} en cours...')
             for i in range(1,50):
                 sinus_molyb = analyse_donnees(f"Données/Données_molyb_{i}.lvm")
                 traité = phase(sinus_molyb)
