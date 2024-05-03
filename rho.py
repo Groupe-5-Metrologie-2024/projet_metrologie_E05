@@ -5,7 +5,7 @@ from scipy.integrate import quad
 from scipy.special import iv as I
 from scipy.special import kv as K
 import matplotlib.pyplot as plt
-from scipy.optimize import fsolve
+from scipy.optimize import fsolve,curve_fit
 import csv
 from scipy.interpolate import interp1d
 from scipy.special import modstruve as L
@@ -28,7 +28,7 @@ def analyse_donnees(nomfichier):
 
 #Cuivre
 b = 3.16e-3/2
-omega = 2*np.pi*10**4
+omega = 2*np.pi*10**3
 mu0 = mu_0
 e0 = epsilon_0
 er = 1
@@ -41,50 +41,20 @@ rho_approx_cuivre = 1.7*10**(-8)
 rho_approx_molyb = 5*10**(-8)
 rho_approx_invar = 8.2*10**(-7)
 
-def traitement_sinus(sinus,t) :
-    # Générer une liste de valeurs de sinus pour la première fonction
-    A = sinus
-
-    T = t
-
-    # Créer une fonction d'interpolation
-    f = interp1d(T, A, kind='cubic')
-#   
-    # Générer une plage de temps pour évaluer la fonction
-    x=np.linspace(0,t[len(t)-1],len(t)*10)
-    
-    # Calculer les valeurs interpolées
-    valeurs_interp = f(x)
-    #plt.plot(x,valeurs_interp)
-    # Calculer la dérivée numérique
-    dx = x[1] - x[0]
-
-    derivee_interp = np.gradient(valeurs_interp, dx)
-
-    # Trouver les zéros de la dérivée
-    zeros_indices_0 = np.where(np.diff(np.sign(derivee_interp)))[0]
-    zeros_indices = [zeros_indices_0[i] for i in range(len(zeros_indices_0)-1) if float(x[zeros_indices_0[i+1]]-x[zeros_indices_0[i]])>1.5/omega]
-
-    # Afficher les zéros de la dérivée
-    zeros_temps = x[zeros_indices]
-    zeros_valeurs = valeurs_interp[zeros_indices]
-    
-    return zeros_valeurs,zeros_temps
-
 def phase(output):
     phaseurs = []
+    res = []
+    alpha = []
     for i in range(len(output)-1):
-        Valeurs, temps = traitement_sinus(output[i],output[2])
-        max = [l for l in Valeurs if l>0]
-        min = [l for l in Valeurs if l<0]
-        voltage = (sum(max)/len(max)-sum(min)/len(min))/2
-
-        t = list(Valeurs).index(max[int(len(max)/2)])
-        dephasage = temps[t]
-        phaseur = voltage*np.exp(-1j*omega*dephasage)      
-        phaseurs.append(phaseur)
-    return phaseurs
-     
+        def fit(x,V,phi):
+            return V*np.cos(omega*x+phi)
+        param = curve_fit(fit,output[2],output[i])
+        y = np.array([fit(i,param[0][0],param[0][1]) for i in output[2]])
+        std = np.std(output[i]-y)
+        phaseurs.append(param[0][0]*np.exp(1j*param[0][1]))
+        res.append(std)
+        alpha.append(param[1])
+    return phaseurs,res,alpha
 def f_integrale(xi,rho=rho_approx_cuivre,mur=1):
     gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
     eta = (xi**2-omega**2*mu0*e0)**(1/2)
@@ -107,9 +77,68 @@ def delta_Z_struve(x,z=0):
         return (np.real(delta_Z-z),np.imag(delta_Z-z)) 
 
 def delta_Z_struve_real(x,z=0):
-    delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve, 0,1000, args=(x,1,),complex_func=True,limit =1000,points=[0])[0]
+    delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve, 0,200, args=(x,1,),complex_func=True,limit =1000,points=[0])[0]
     return np.imag(delta_Z-z)
 
+#fonction partielles intégré
+def f_integrale_struve_b(xi,b,rho=rho_approx_cuivre,mur=1):
+    gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
+    eta = (xi**2-omega**2*mu0*e0)**(1/2)
+    l_plus = a+d/2
+    l_moins = a-d/2
+    F = (np.pi/(2*eta))*l_plus*(K(1,l_plus*eta)*L(0,l_plus*eta)+L(1,l_plus*eta)*K(0,l_plus*eta)) - (np.pi/(2*eta))*l_moins*(K(1,l_moins*eta)*L(0,l_moins*eta)+L(1,l_moins*eta)*K(0,l_moins*eta))
+    return (2/xi)**2*np.sin(l*xi/2)**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*F**2
+def f_integrale_struve_a(xi,a,rho=rho_approx_cuivre,mur=1):
+    gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
+    eta = (xi**2-omega**2*mu0*e0)**(1/2)
+    l_plus = a+d/2
+    l_moins = a-d/2
+    F = (np.pi/(2*eta))*l_plus*(K(1,l_plus*eta)*L(0,l_plus*eta)+L(1,l_plus*eta)*K(0,l_plus*eta)) - (np.pi/(2*eta))*l_moins*(K(1,l_moins*eta)*L(0,l_moins*eta)+L(1,l_moins*eta)*K(0,l_moins*eta))
+    return (2/xi)**2*np.sin(l*xi/2)**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*F**2
+def f_integrale_struve_l(xi,l,rho=rho_approx_cuivre,mur=1):
+    gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
+    eta = (xi**2-omega**2*mu0*e0)**(1/2)
+    l_plus = a+d/2
+    l_moins = a-d/2
+    F = (np.pi/(2*eta))*l_plus*(K(1,l_plus*eta)*L(0,l_plus*eta)+L(1,l_plus*eta)*K(0,l_plus*eta)) - (np.pi/(2*eta))*l_moins*(K(1,l_moins*eta)*L(0,l_moins*eta)+L(1,l_moins*eta)*K(0,l_moins*eta))
+    return (2/xi)**2*np.sin(l*xi/2)**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*F**2
+
+def f_integrale_struve_d(xi,d,rho=rho_approx_cuivre,mur=1):
+    gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
+    eta = (xi**2-omega**2*mu0*e0)**(1/2)
+    l_plus = a+d/2
+    l_moins = a-d/2
+    F = (np.pi/(2*eta))*l_plus*(K(1,l_plus*eta)*L(0,l_plus*eta)+L(1,l_plus*eta)*K(0,l_plus*eta)) - (np.pi/(2*eta))*l_moins*(K(1,l_moins*eta)*L(0,l_moins*eta)+L(1,l_moins*eta)*K(0,l_moins*eta))
+    return (2/xi)**2*np.sin(l*xi/2)**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*F**2
+#fonction partielles deltaz
+def delta_Z_struve_real_l(x=rho_approx_cuivre,l=l,z=0):
+    integ = quad(f_integrale_struve_l, 0,200, args=(l,x,1,),complex_func=True,limit =1000,points=[0])
+    delta_Z = 2j*omega*mu0*(n/(d*l))**2*integ[0]
+    return np.imag(delta_Z-z)
+def delta_Z_struve_real_d(x=rho_approx_cuivre,d=d,z=0):
+    delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve_d, 0,200, args=(d,x,1,),complex_func=True,limit =1000,points=[0])[0]
+    return np.imag(delta_Z-z)
+def delta_Z_struve_real_a(x=rho_approx_cuivre,a=a,z=0):
+    delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve_a, 0,200, args=(a,x,1,),complex_func=True,limit =1000,points=[0])[0]
+    return np.imag(delta_Z-z)
+def delta_Z_struve_real_b(x=rho_approx_cuivre,b=b,z=0):
+    delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve_b, 0,200, args=(b,x,1,),complex_func=True,limit =1000,points=[0])[0]
+    return np.imag(delta_Z-z)
+
+#fonctions partielles invar
+def delta_Z_struve_real_l_invar(x=rho_approx_cuivre,l=l,z=0):
+    integ = quad(f_integrale_struve_l, 0,200, args=(l,x[0],x[1],),complex_func=True,limit =1000,points=[0])
+    delta_Z = 2j*omega*mu0*(n/(d*l))**2*integ[0]
+    return np.real(delta_Z-z),np.imag(delta_Z-z)
+def delta_Z_struve_real_d_invar(x=rho_approx_cuivre,d=d,z=0):
+    delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve_d, 0,200, args=(d,x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
+    return np.real(delta_Z-z),np.imag(delta_Z-z)
+def delta_Z_struve_real_a_invar(x=rho_approx_cuivre,a=a,z=0):
+    delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve_a, 0,200, args=(a,x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
+    return np.real(delta_Z-z),np.imag(delta_Z-z)
+def delta_Z_struve_real_b_invar(x=rho_approx_cuivre,b=b,z=0):
+    delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve_b, 0,200, args=(b,x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
+    return np.real(delta_Z-z),np.imag(delta_Z-z)
 
 z1 = 2.5398+1j*omega*549.03e-6
 zcuivre = 2.5698+1j*omega*548.16e-6
@@ -125,30 +154,199 @@ zinvar_2 = 2.6107+1j*omega*574.96e-6
 
 z_calib = z2-z1
 
-sinus_cuivre = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_cuivre_2.lvm")
-phaseurs_cuivre = phase(sinus_cuivre)
-poo_cuivre = -(phaseurs_cuivre[1])/phaseurs_cuivre[0]/15.32
-z_cuivre = 2*(z2)*poo_cuivre/(1-poo_cuivre)-z_calib
-print(fsolve(delta_Z_struve,[rho_approx_cuivre], args = z_cuivre))
+"""residus = np.real(sinus_ref)-sinus_cuivre[0]
+ecartype = np.sqrt(1/(len(residus)-2)*sum([i**2 for i in residus]))
+residus/=ecartype
 
-residus = 
+"""
+"""def f(x):
+    sinus_ref = phaseurs_cuivre[0]*np.exp(1j*omega*np.array(sinus_cuivre[2]))*np.exp(1j*x)
+    residus = np.real(sinus_ref)-sinus_cuivre[0]
+    residus/=np.sqrt(1/(len(residus)-2)*sum([i**2 for i in residus]))
+    av = np.std(residus)
+    return av
 
+x = np.linspace(-1,1,100)
+y = [f(i) for i in x]
 
+plt.plot(x,y)
+plt.show()
+derivee_interp = np.gradient(y, 1e-10)
+zeros_indices_0 = np.where(np.diff(np.sign(derivee_interp)))[0]
+print(zeros_indices_0)
+sinus_ref *= np.exp(1j*x[zeros_indices_0[0]])"""
+
+def incertitude(z,phaseurs,alpha_res=0, alpha_sin = 0, mu =1):
+    dx = 1e-10
+    #dimensions
+    incertitude_l = (fsolve(delta_Z_struve_real_l,[rho_approx_cuivre],args = (l+dx,z))-fsolve(delta_Z_struve_real_l,[rho_approx_cuivre],args = (l,z)))/dx*0.01e-3/np.sqrt(12)
+    incertitude_b = (fsolve(delta_Z_struve_real_b,[rho_approx_cuivre],args = (b+dx,z))-fsolve(delta_Z_struve_real_b,[rho_approx_cuivre],args = (b,z)))/dx*0.01e-3/np.sqrt(12)
+    incertitude_a = (fsolve(delta_Z_struve_real_a,[rho_approx_cuivre],args = (a+dx,z))-fsolve(delta_Z_struve_real_a,[rho_approx_cuivre],args = (a,z)))/dx*0.01e-3/np.sqrt(12)
+    incertitude_d = (fsolve(delta_Z_struve_real_d,[rho_approx_cuivre],args = (d+dx,z))-fsolve(delta_Z_struve_real_d,[rho_approx_cuivre],args = (d,z)))/dx*0.01e-3/np.sqrt(12)
+    incertitude_totale = incertitude_a**2+incertitude_b**2+incertitude_d**2+incertitude_l**2
+    #Tension
+    incertitude_mix = (fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z+1j*dx))-fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z)))/dx*alpha_res
+    incertitude_totale += incertitude_mix**2
+    return incertitude_totale[0]
+
+def incertitude_invar(z,phaseurs,alpha_res=0, alpha_sin = 0, mu =1):
+    dx = 1e-10
+    #dimensions
+    incertitude_l = (fsolve(delta_Z_struve_real_l_invar,[rho_approx_cuivre, 100],args = (l+dx,z))-fsolve(delta_Z_struve_real_l_invar,[rho_approx_cuivre, 100],args = (l,z)))/dx*0.01e-3/np.sqrt(12)
+    incertitude_b = (fsolve(delta_Z_struve_real_b_invar,[rho_approx_cuivre, 100],args = (b+dx,z))-fsolve(delta_Z_struve_real_b_invar,[rho_approx_cuivre, 100],args = (b,z)))/dx*0.01e-3/np.sqrt(12)
+    incertitude_a = (fsolve(delta_Z_struve_real_a_invar,[rho_approx_cuivre, 100],args = (a+dx,z))-fsolve(delta_Z_struve_real_a_invar,[rho_approx_cuivre, 100],args = (a,z)))/dx*0.01e-3/np.sqrt(12)
+    incertitude_d = (fsolve(delta_Z_struve_real_d_invar,[rho_approx_cuivre, 100],args = (d+dx,z))-fsolve(delta_Z_struve_real_d_invar,[rho_approx_cuivre, 100],args = (d,z)))/dx*0.01e-3/np.sqrt(12)
+    incertitude_totale = incertitude_a**2+incertitude_b**2+incertitude_d**2+incertitude_l**2
+    #Tension
+    incertitude_mix = (fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z+1j*dx))-fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z)))/dx*alpha_res
+    incertitude_totale += incertitude_mix**2
+    return incertitude_totale[0]
+
+def incertitude_verif(z,alpha_res=0, alpha_sin = 0, mu =1):
+    dx = 1e-10
+    #dimensions
+    incertitude_l = (fsolve(delta_Z_struve_real_l,[rho_approx_cuivre],args = (l+dx,z))-fsolve(delta_Z_struve_real_l,[rho_approx_cuivre],args = (l,z)))/dx*0.01e-3/np.sqrt(12)
+    incertitude_b = (fsolve(delta_Z_struve_real_b,[rho_approx_cuivre],args = (b+dx,z))-fsolve(delta_Z_struve_real_b,[rho_approx_cuivre],args = (b,z)))/dx*0.01e-3/np.sqrt(12)
+    incertitude_a = (fsolve(delta_Z_struve_real_a,[rho_approx_cuivre],args = (a+dx,z))-fsolve(delta_Z_struve_real_a,[rho_approx_cuivre],args = (a,z)))/dx*0.01e-3/np.sqrt(12)
+    incertitude_d = (fsolve(delta_Z_struve_real_d,[rho_approx_cuivre],args = (d+dx,z))-fsolve(delta_Z_struve_real_d,[rho_approx_cuivre],args = (d,z)))/dx*0.01e-3/np.sqrt(12)
+    incertitude_totale = incertitude_a**2+incertitude_b**2+incertitude_d**2+incertitude_l**2
+    return incertitude_totale[0]
+
+z = []
+for i in range(1,52):
+    sinus_molyb = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_cuivre_{i}.lvm")
+    traité = phase(sinus_molyb)
+    phaseurs_molyb = traité[0]
+    erreur_res = traité[1]
+    alpha_param = traité[2]
+    poo_molyb = -(phaseurs_molyb[0])/phaseurs_molyb[1]/(1+2*2370/325.113)
+    z_molyb = 2*(z2)*poo_molyb/(1-poo_molyb)-z_calib
+    incertitude_G = np.sqrt((2/325.113*0.151421)**2+(2/325.113**2*2370*1.2824)**2)
+    incertitude_z = np.sqrt((np.imag(2*(z2)/(1-poo_molyb**(-1))**2*1/phaseurs_molyb[0]*erreur_res[1]))**2+(np.imag(2*(z2)/(1-poo_molyb**(-1))**2*phaseurs_molyb[1]/phaseurs_molyb[0]**2*erreur_res[0]))**2+(np.imag(2*(z2)/(1-poo_molyb**(-1)*(1+2*2370/325.113))**2*phaseurs_molyb[1]/phaseurs_molyb[0]*incertitude_G))**2)
+    rho = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z_molyb))
+    rho_incertitude = np.sqrt(incertitude(z_molyb,phaseurs_molyb, incertitude_z, alpha_param))
+    print(rho_incertitude)
+    if np.abs(rho[0])<1e-5:
+        z.append([np.abs(rho[0]),rho_incertitude,i])
+
+x = [i[2]*0.5+25.5+273.15 for i in z]
+y = [i[0] for i in z]
+err = [2*i[1] for i in z]
+
+def degre2(x,a,b):
+    return a*x**2+b
+
+param = curve_fit(degre2, x,y,sigma=err)
+
+y_fit = [degre2(i,param[0][0],param[0][1]) for i in x]
+
+res = [(y[i]-y_fit[i])/err[i] for i in range(len(x))]
+
+plot1 = plt.subplot2grid((4,4),(0,0),colspan=4, rowspan=2)
+plot2 = plt.subplot2grid((3,4),(2,0),colspan=4, rowspan=1)
+
+plot1.plot(x,y_fit,label = f"({param[0][0]:.2g}±{np.sqrt(param[1][0][0]):.2g})x+({param[0][1]:.2g}±{np.sqrt(param[1][1][1]):.2g})")
+plot1.errorbar(x,y,yerr=err, fmt=".k",elinewidth = 0.75,capsize=5)
+plot2.scatter(x,res)
+
+plot1.set_title("Valeurs mesurées de résistivité en fonction de la température du cuivre OHFC")
+plot2.set_ylabel("Résidus normalisés")
+
+plot1.set_ylabel("Résistivité (Ωm)")
+plot2.set_xlabel("Température (K)")
+plot1.grid(True)
+plot1.legend()
+plot2.grid(True)
+plt.show()
 
 z = []
 for i in range(1,50):
-    sinus_molyb = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_cuivre_{i}.lvm")
-    phaseurs_molyb = phase(sinus_molyb)
-    poo_molyb = -(phaseurs_molyb[0])/phaseurs_molyb[1]/15.32
+    sinus_molyb = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_molyb_{i}.lvm")
+    traité = phase(sinus_molyb)
+    phaseurs_molyb = traité[0]
+    erreur_res = traité[1]
+    alpha_param = traité[2]
+    poo_molyb = (phaseurs_molyb[0])/phaseurs_molyb[1]/(1+2*2370/325.113)
     z_molyb = 2*(z2)*poo_molyb/(1-poo_molyb)-z_calib
-    x = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z_molyb))
-    print(z_molyb,np.abs(x[0]))
-    if np.abs(x[0])<1e-5:
-        z.append(np.abs(x[0]))
-    else:
-        z.append(None)
-print(x)
-x = np.linspace(25,50,49)
-plt.scatter(x,z)
+    incertitude_G = np.sqrt((2/325.113*0.151421)**2+(2/325.113**2*2370*1.2824)**2)
+    incertitude_z = np.sqrt((np.imag(2*(z2)/(1-poo_molyb**(-1))**2*1/phaseurs_molyb[0]*erreur_res[1]))**2+(np.imag(2*(z2)/(1-poo_molyb**(-1))**2*phaseurs_molyb[1]/phaseurs_molyb[0]**2*erreur_res[0]))**2+(np.imag(2*(z2)/(1-poo_molyb**(-1)*(1+2*2370/325.113))**2*phaseurs_molyb[1]/phaseurs_molyb[0]*incertitude_G))**2)
+    rho = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z_molyb))
+    rho_incertitude = np.sqrt(incertitude(z_molyb,phaseurs_molyb, incertitude_z, alpha_param))
+    print(rho_incertitude)
+    if np.abs(rho[0])<1e-5:
+        z.append([np.abs(rho[0]),rho_incertitude,i])
+
+x = [i[2]*0.5+24.5+273.15 for i in z]
+y = [i[0] for i in z]
+err = [i[1] for i in z]
+
+def degre2(x,b,c):
+    return b*x+c
+
+param = curve_fit(degre2, x,y,sigma=err)
+
+y_fit = [degre2(i,param[0][0],param[0][1]) for i in x]
+
+res = [(y[i]-y_fit[i])/err[i] for i in range(len(x))]
+
+plot1 = plt.subplot2grid((4,4),(0,0),colspan=4, rowspan=2)
+plot2 = plt.subplot2grid((3,4),(2,0),colspan=4, rowspan=1)
+
+plot1.plot(x,y_fit,label = f"({param[0][0]:.2g}±{np.sqrt(param[1][0][0]):.2g})x+({param[0][1]:.2g}±{np.sqrt(param[1][1][1]):.2g})")
+plot1.errorbar(x,y,yerr=err, fmt=".k",elinewidth = 0.75,capsize=5)
+plot2.scatter(x,res)
+
+plot1.set_title("Valeurs mesurées de résistivité en fonction de la température du molybdène")
+plot2.set_ylabel("Résidus normalisés")
+
+plot1.set_ylabel("Résistivité (Ωm)")
+plot2.set_xlabel("Température (K)")
+plot1.grid(True)
+plot1.legend()
+plot2.grid(True)
 plt.show()
 
+z = []
+for i in range(1,46):
+    sinus_molyb = analyse_donnees(f"C:\\Users\\alexi\\OneDrive - polymtl.ca\\H24\\données\\Données_invar\\Données_invar_{i}.lvm")
+    traité = phase(sinus_molyb)
+    phaseurs_molyb = traité[0]
+    erreur_res = traité[1]
+    alpha_param = traité[2]
+    poo_molyb = (phaseurs_molyb[0])/phaseurs_molyb[1]/(3)
+    z_molyb = 2*(z2)*poo_molyb/(1-poo_molyb)-z_calib
+    incertitude_G = np.sqrt((2/325.113*0.151421)**2+(2/325.113**2*2370*1.2824)**2)
+    incertitude_z = np.sqrt((np.imag(2*(z2)/(1-poo_molyb**(-1))**2*1/phaseurs_molyb[0]*erreur_res[1]))**2+(np.imag(2*(z2)/(1-poo_molyb**(-1))**2*phaseurs_molyb[1]/phaseurs_molyb[0]**2*erreur_res[0]))**2)
+    rho = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z_molyb))
+    rho_incertitude = np.sqrt(incertitude(z_molyb,phaseurs_molyb, incertitude_z, alpha_param))
+    z.append([np.abs(rho[0]),rho_incertitude,i])
+
+x = [i[2]*0.5+26.5+273.15 for i in z]
+y = [i[0] for i in z]
+err = [i[1] for i in z]
+
+def degre2(x,b,c):
+    return b*x+c
+
+param = curve_fit(degre2, x,y,sigma=err)
+
+y_fit = [degre2(i,param[0][0],param[0][1]) for i in x]
+
+res = [(y[i]-y_fit[i])/err[i] for i in range(len(x))]
+
+plot1 = plt.subplot2grid((4,4),(0,0),colspan=4, rowspan=2)
+plot2 = plt.subplot2grid((3,4),(2,0),colspan=4, rowspan=1)
+
+plot1.plot(x,y_fit,label = f"({param[0][0]:.2g}±{np.sqrt(param[1][0][0]):.2g})x+({param[0][1]:.2g}±{np.sqrt(param[1][1][1]):.2g})")
+plot1.errorbar(x,y,yerr=err, fmt=".k",elinewidth = 0.75,capsize=5)
+plot2.scatter(x,res)
+
+plot1.set_title("Valeurs mesurées de résistivité en fonction de la température de l'invar")
+plot2.set_ylabel("Résidus normalisés")
+
+plot1.set_ylabel("Résistivité (Ωm)")
+plot2.set_xlabel("Température (K)")
+plot1.grid(True)
+plot1.legend()
+plot2.grid(True)
+plt.show()
