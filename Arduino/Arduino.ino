@@ -20,7 +20,7 @@ void loop() {
   float temperature = thermo.temperature(RNOMINAL, RREF);
   Serial.println(temperature);
 
-  updateTemperatureEndsWithQuarter(temperature);
+  //updateTemperatureEndsWithQuarter(temperature);
 
   uint8_t fault = thermo.readFault();
   if (fault) {
@@ -47,16 +47,19 @@ void loop() {
   }
   delay(10);
 }
+//void updateTemperatureEndsWithQuarter(float temperature) {
+  //float diff = temperature - int(temperature); // Get the decimal part of the temperature
+  //if (temperature >= 26 && temperature <= 50) {
+   // if ((diff >= 0.00 && diff <= 0.10) || 
+       // (diff >= 0.20 && diff <= 0.30) || 
+        //(diff >= 0.50 && diff <= 0.60) || 
+       // (diff >= 0.70 && diff <= 0.80)) {
+     // temperatureEndsWithQuarter = true;
+    //} else {
+     // temperatureEndsWithQuarter = false;
+   // }
+  //} else {
+   // temperatureEndsWithQuarter = false;
+ //}
+//}
 
-void updateTemperatureEndsWithQuarter(float temperature) {
-  float diff = temperature - int(temperature); // Get the decimal part of the temperature
-  if (temperature >= 24 && temperature <= 50) {
-    if (diff == 0.00 || diff == 0.25 || diff == 0.50 || diff == 0.75) {
-      temperatureEndsWithQuarter = true;
-    } else {
-      temperatureEndsWithQuarter = false;
-    }
-  } else {
-    temperatureEndsWithQuarter = false;
-  }
-}
