@@ -46,6 +46,10 @@ print('')
 print('')
 #----------------- Modification generales DEBUT
 
+#Copier et remplacer le chemin relatif vers le dossier Données.
+
+Chemin_relatif = "Données"
+
 #CODE 1
 if Activation_Production_CSV_rho == 1 :
     Nom_materiau_utilisé = "invar"
@@ -222,6 +226,7 @@ def phase(output):
         res.append(std)
         alpha.append(param[1])
     return phaseurs,res,alpha
+
 def f_integrale(xi,rho=rho_approx_cuivre,mur=1):
     gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
     eta = (xi**2-omega**2*mu0*e0)**(1/2)
@@ -351,18 +356,28 @@ def TOTAL(Materiau):
         if Materiau == "invar":
             for i in range(1,50):
                 print(f'Calcul sur le fichier {i} en cours...')
-                sinus_molyb = analyse_donnees(f"Données/Données_invar_{i}.lvm")
-                traité = phase(sinus_molyb)
-                phaseurs_molyb = traité[0]
+                try :
+                    sinus = analyse_donnees(f"{Chemin_relatif}/Données_invar_{i}.lvm")
+                except :
+                    print('Erreur de chemin')
+                    sinus = analyse_donnees(f"{Chemin_relatif}\Données_invar_{i}.lvm")
+                traité = phase(sinus)
+                print('a')
+                phaseurs = traité[0]
                 erreur_res = traité[1]
                 alpha_param = traité[2]
-                poo_molyb = (phaseurs_molyb[0])/phaseurs_molyb[1]/(3)
-                z_molyb = 2*(z2)*poo_molyb/(1-poo_molyb)-z_calib
+                poo = (phaseurs[0])/phaseurs[1]/(3)
+                z = 2*(z2)*poo/(1-poo)-z_calib
                 incertitude_G = np.sqrt((2/325.113*0.151421)**2+(2/325.113**2*2370*1.2824)**2)
-                incertitude_z = np.sqrt((np.imag(2*(z2)/(1-poo_molyb**(-1))**2*1/phaseurs_molyb[0]*erreur_res[1]))**2+(np.imag(2*(z2)/(1-poo_molyb**(-1))**2*phaseurs_molyb[1]/phaseurs_molyb[0]**2*erreur_res[0]))**2)
-                rho = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z_molyb))
-                rho_incertitude = np.sqrt(incertitude(z_molyb,phaseurs_molyb, incertitude_z, alpha_param))
+                print('B')
+                incertitude_z = np.sqrt((np.imag(2*(z2)/(1-poo**(-1))**2*1/phaseurs[0]*erreur_res[1]))**2+(np.imag(2*(z2)/(1-poo**(-1))**2*phaseurs[1]/phaseurs[0]**2*erreur_res[0]))**2)
+                print('c')
+                rho = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z))
+                print('d')
+                rho_incertitude = np.sqrt(incertitude(z,phaseurs, incertitude_z, alpha_param))
+                print('e')
                 z.append([np.abs(rho[0]),rho_incertitude,i])
+                print('f')
             x = [i[2]*0.5+26.5+273.15 for i in z]
             y = [i[0] for i in z]
             err = [i[1] for i in z]
@@ -373,17 +388,21 @@ def TOTAL(Materiau):
         elif Materiau == "Cuivre":
             print(f'Calcul sur le fichier {i} en cours...')
             for i in range(1,50):
-                sinus_molyb = analyse_donnees(f"Données/Données_cuivre_{i}.lvm")
-                traité = phase(sinus_molyb)
-                phaseurs_molyb = traité[0]
+                try :
+                    sinus = analyse_donnees(f"{Chemin_relatif}/Données_cuivre_{i}.lvm")
+                except :
+                    print('Erreur Chemin')
+                    sinus = analyse_donnees(f"{Chemin_relatif}\Données_cuivre_{i}.lvm")
+                traité = phase(sinus)
+                phaseurs = traité[0]
                 erreur_res = traité[1]
                 alpha_param = traité[2]
-                poo_molyb = -(phaseurs_molyb[0])/phaseurs_molyb[1]/(1+2*2370/325.113)
-                z_molyb = 2*(z2)*poo_molyb/(1-poo_molyb)-z_calib
+                poo = -(phaseurs[0])/phaseurs[1]/(1+2*2370/325.113)
+                z = 2*(z2)*poo/(1-poo)-z_calib
                 incertitude_G = np.sqrt((2/325.113*0.151421)**2+(2/325.113**2*2370*1.2824)**2)
-                incertitude_z = np.sqrt((np.imag(2*(z2)/(1-poo_molyb**(-1))**2*1/phaseurs_molyb[0]*erreur_res[1]))**2+(np.imag(2*(z2)/(1-poo_molyb**(-1))**2*phaseurs_molyb[1]/phaseurs_molyb[0]**2*erreur_res[0]))**2+(np.imag(2*(z2)/(1-poo_molyb**(-1)*(1+2*2370/325.113))**2*phaseurs_molyb[1]/phaseurs_molyb[0]*incertitude_G))**2)
-                rho = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z_molyb))
-                rho_incertitude = np.sqrt(incertitude(z_molyb,phaseurs_molyb, incertitude_z, alpha_param))
+                incertitude_z = np.sqrt((np.imag(2*(z2)/(1-poo**(-1))**2*1/phaseurs[0]*erreur_res[1]))**2+(np.imag(2*(z2)/(1-poo**(-1))**2*phaseurs[1]/phaseurs[0]**2*erreur_res[0]))**2+(np.imag(2*(z2)/(1-poo**(-1)*(1+2*2370/325.113))**2*phaseurs[1]/phaseurs[0]*incertitude_G))**2)
+                rho = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z))
+                rho_incertitude = np.sqrt(incertitude(z,phaseurs, incertitude_z, alpha_param))
                 if np.abs(rho[0])<1e-5:
                     z.append([np.abs(rho[0]),rho_incertitude,i])
             x = [i[2]*0.5+25.5+273.15 for i in z]
@@ -396,17 +415,21 @@ def TOTAL(Materiau):
         elif Materiau == "Molyb":
             print(f'Calcul sur le fichier {i} en cours...')
             for i in range(1,50):
-                sinus_molyb = analyse_donnees(f"Données/Données_molyb_{i}.lvm")
-                traité = phase(sinus_molyb)
-                phaseurs_molyb = traité[0]
+                try :
+                    sinus = analyse_donnees(f"{Chemin_relatif}/Données_molyb_{i}.lvm")
+                except :
+                    print('Erreur Chemin')
+                    sinus = analyse_donnees(f"{Chemin_relatif}\Données_molyb_{i}.lvm")
+                traité = phase(sinus)
+                phaseurs = traité[0]
                 erreur_res = traité[1]
                 alpha_param = traité[2]
-                poo_molyb = (phaseurs_molyb[0])/phaseurs_molyb[1]/(1+2*2370/325.113)
-                z_molyb = 2*(z2)*poo_molyb/(1-poo_molyb)-z_calib
+                poo = (phaseurs[0])/phaseurs[1]/(1+2*2370/325.113)
+                z = 2*(z2)*poo/(1-poo)-z_calib
                 incertitude_G = np.sqrt((2/325.113*0.151421)**2+(2/325.113**2*2370*1.2824)**2)
-                incertitude_z = np.sqrt((np.imag(2*(z2)/(1-poo_molyb**(-1))**2*1/phaseurs_molyb[0]*erreur_res[1]))**2+(np.imag(2*(z2)/(1-poo_molyb**(-1))**2*phaseurs_molyb[1]/phaseurs_molyb[0]**2*erreur_res[0]))**2+(np.imag(2*(z2)/(1-poo_molyb**(-1)*(1+2*2370/325.113))**2*phaseurs_molyb[1]/phaseurs_molyb[0]*incertitude_G))**2)
-                rho = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z_molyb))
-                rho_incertitude = np.sqrt(incertitude(z_molyb,phaseurs_molyb, incertitude_z, alpha_param))
+                incertitude_z = np.sqrt((np.imag(2*(z2)/(1-poo**(-1))**2*1/phaseurs[0]*erreur_res[1]))**2+(np.imag(2*(z2)/(1-poo**(-1))**2*phaseurs[1]/phaseurs[0]**2*erreur_res[0]))**2+(np.imag(2*(z2)/(1-poo**(-1)*(1+2*2370/325.113))**2*phaseurs[1]/phaseurs[0]*incertitude_G))**2)
+                rho = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z))
+                rho_incertitude = np.sqrt(incertitude(z,phaseurs, incertitude_z, alpha_param))
                 print(rho_incertitude)
                 if np.abs(rho[0])<1e-5:
                     z.append([np.abs(rho[0]),rho_incertitude,i])
