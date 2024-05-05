@@ -50,14 +50,14 @@ print('')
 
 Chemin_relatif = "Données"
 
-#MATERIAUX POSSIBLES SONT : "cuivre" ; "molyb" ; "invar_avec" ; "invar_sans"
+#MATERIAUX POSSIBLES SONT : "cuivre" ; "molyb" ; "invar_avec" ; "invar_sans"     (le avec et sans réfère à l'utilisation ou non d'aimants)
 #CODE 1
 if Activation_Production_CSV_rho == 1 :
-    Nom_materiau_utilisé = "molyb"
+    Nom_materiau_utilisé = "invar_avec"
 
 #CODE 2
 if Activation_Graphique_résistivité_Température == 1 :  
-    Nom_materiau_utilisé = "molyb"
+    Nom_materiau_utilisé = "invar_avec"
 
 
 #----- Données -----#
@@ -325,23 +325,23 @@ def TOTAL(Materiau):
     z = []
     try :
         if Materiau == "invar_avec" :
-            for i in range(1,46):
+            for i in range(1,60):
                 print(f'Calcul en cours sur le fichier {i}...')
                 try :
-                    sinus_molyb = analyse_donnees(f"{Chemin_relatif}/Données_invar_avec_{i}.lvm")
+                    sinus_inv = analyse_donnees(f"{Chemin_relatif}/Données_invar_avec_{i}.lvm")
                 except :
                     print('Erreur Chemin, Tentative chemin Windows')
-                    sinus_molyb = analyse_donnees(f"{Chemin_relatif}\\Données_invar_avec_{i}.lvm")
-                traité = phase(sinus_molyb)
-                phaseurs_molyb = [-traité[0][1],traité[0][0]]
+                    sinus_inv = analyse_donnees(f"{Chemin_relatif}\\Données_invar_avec_{i}.lvm")
+                traité = phase(sinus_inv)
+                phaseurs_inv = [-traité[0][1],traité[0][0]]
                 alpha_param = traité[1]
-                poo_molyb = -(phaseurs_molyb[0])/phaseurs_molyb[1]/(1+2*2370/325.113)
-                z_molyb = 2*(z2)*poo_molyb/(1-poo_molyb)-z_calib
+                poo_inv = -(phaseurs_inv[0])/phaseurs_inv[1]/(1+2*2370/325.113)
+                z_inv = 2*(z2)*poo_inv/(1-poo_inv)-z_calib
                 incertitude_g = 0
-                data = fsolve(delta_Z_struve,[rho_approx_molyb,100],args = (z_molyb))
+                data = fsolve(delta_Z_struve,[rho_approx_invar,100],args = (z_inv))
                 rho = data[0]
                 mur = data[1]
-                rho_incertitude = np.sqrt(incertitude(z_molyb,phaseurs_molyb, incertitude_g, alpha_param,mur))
+                rho_incertitude = np.sqrt(incertitude(z_inv,phaseurs_inv, incertitude_g, alpha_param,mur))
                 if np.abs(rho)<1e-5:
                     z.append([np.abs(rho),rho_incertitude,i])
             x = [i[2]*0.5+26.5+273.15 for i in z]
@@ -354,23 +354,23 @@ def TOTAL(Materiau):
             res = [(y[i]-y_fit[i])/err[i] for i in range(len(x))]
         
         if Materiau == "invar_sans" :
-            for i in range(1,46):
+            for i in range(1,60):
                 print(f'Calcul en cours sur le fichier {i}...')
                 try :
-                    sinus_molyb = analyse_donnees(f"{Chemin_relatif}/Données_invar_sans_{i}.lvm")
+                    sinus_inv = analyse_donnees(f"{Chemin_relatif}/Données_invar_sans_{i}.lvm")
                 except :
                     print('Erreur Chemin, Tentative chemin Windows')
-                    sinus_molyb = analyse_donnees(f"{Chemin_relatif}\\Données_invar_sans_{i}.lvm")
-                traité = phase(sinus_molyb)
-                phaseurs_molyb = [-traité[0][1],traité[0][0]]
+                    sinus_inv = analyse_donnees(f"{Chemin_relatif}\\Données_invar_avec_{i}.lvm")
+                traité = phase(sinus_inv)
+                phaseurs_inv = [-traité[0][1],traité[0][0]]
                 alpha_param = traité[1]
-                poo_molyb = -(phaseurs_molyb[0])/phaseurs_molyb[1]/(1+2*2370/325.113)
-                z_molyb = 2*(z2)*poo_molyb/(1-poo_molyb)-z_calib
+                poo_inv = -(phaseurs_inv[0])/phaseurs_inv[1]/(1+2*2370/325.113)
+                z_inv = 2*(z2)*poo_inv/(1-poo_inv)-z_calib
                 incertitude_g = 0
-                data = fsolve(delta_Z_struve,[rho_approx_molyb,100],args = (z_molyb))
+                data = fsolve(delta_Z_struve,[rho_approx_invar,100],args = (z_inv))
                 rho = data[0]
                 mur = data[1]
-                rho_incertitude = np.sqrt(incertitude(z_molyb,phaseurs_molyb, incertitude_g, alpha_param,mur))
+                rho_incertitude = np.sqrt(incertitude(z_inv,phaseurs_inv, incertitude_g, alpha_param,mur))
                 if np.abs(rho)<1e-5:
                     z.append([np.abs(rho),rho_incertitude,i])
             x = [i[2]*0.5+26.5+273.15 for i in z]
@@ -383,22 +383,22 @@ def TOTAL(Materiau):
             res = [(y[i]-y_fit[i])/err[i] for i in range(len(x))]
 
         elif Materiau == "cuivre":
-            for i in range(1,52):
+            for i in range(1,60):
                 print(f'Calcul sur le fichier {i} en cours...')
                 try :
-                    sinus_molyb = analyse_donnees(f"{Chemin_relatif}/Données_cuivre_{i}.lvm")
+                    sinus_cu = analyse_donnees(f"{Chemin_relatif}/Données_cuivre_{i}.lvm")
                 except :
                     print('Erreur Chemin, Tentative chemin Windows')
-                    sinus_molyb = analyse_donnees(f"{Chemin_relatif}\\Données_cuivre_{i}.lvm")
+                    sinus_cu = analyse_donnees(f"{Chemin_relatif}\\Données_cuivre_{i}.lvm")
                 traité = phase(sinus_molyb)
-                phaseurs_molyb = traité[0]
+                phaseurs_cu = traité[0]
                 alpha_param = traité[1]
-                poo_molyb = -(phaseurs_molyb[0])/phaseurs_molyb[1]/(1+2*2370/325.113)
-                z_molyb = 2*(z2)*poo_molyb/(1-poo_molyb)-z_calib
+                poo_cu = -(phaseurs_cu[0])/phaseurs_cu[1]/(1+2*2370/325.113)
+                z_cu = 2*(z2)*poo_cu/(1-poo_cu)-z_calib
                 incertitude_G = np.sqrt((2/325.113*0.151421)**2+(2/325.113**2*2370*1.2824)**2)
-                incertitude_g = np.sqrt(+(np.imag(2*(z2)/(1-poo_molyb**(-1)*(1+2*2370/325.113))**2*phaseurs_molyb[1]/phaseurs_molyb[0]*incertitude_G))**2)
-                rho = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z_molyb))
-                rho_incertitude = np.sqrt(incertitude(z_molyb,phaseurs_molyb, incertitude_g, alpha_param))
+                incertitude_g = np.sqrt(+(np.imag(2*(z2)/(1-poo_cu**(-1)*(1+2*2370/325.113))**2*phaseurs_cu[1]/phaseurs_cu[0]*incertitude_G))**2)
+                rho = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z_cu))
+                rho_incertitude = np.sqrt(incertitude(z_molyb,phaseurs_cu, incertitude_g, alpha_param))
                 if np.abs(rho[0])<1e-5:
                     z.append([np.abs(rho[0]),rho_incertitude,i])
             x = [i[2]*0.5+25.5+273.15 for i in z]
@@ -411,7 +411,7 @@ def TOTAL(Materiau):
             res = [(y[i]-y_fit[i])/err[i] for i in range(len(x))]
         
         elif Materiau == "molyb":
-            for i in range(1,50):
+            for i in range(1,60):
                 print(f'Calcul sur le fichier {i} en cours...')
                 try :
                     sinus_molyb = analyse_donnees(f"{Chemin_relatif}/Données_molyb_{i}.lvm")
@@ -466,7 +466,7 @@ if Activation_Graphique_résistivité_Température == 1 :
     #Generation des graphiques -----------------------------------------------------------------------------------------------------------------------
     print('GENERATION GRAPHIQUE 1')
     try :
-        if Nom_materiau_utilisé == "invar":
+        if Nom_materiau_utilisé == "invar_sans":
 
             plot1 = plt.subplot2grid((4,4),(0,0),colspan=4, rowspan=2)
             plot2 = plt.subplot2grid((3,4),(2,0),colspan=4, rowspan=1)
@@ -480,7 +480,22 @@ if Activation_Graphique_résistivité_Température == 1 :
             plot1.legend()
             plot2.grid(True)
             plt.show()
-    
+
+        if Nom_materiau_utilisé == "invar_avec":
+
+            plot1 = plt.subplot2grid((4,4),(0,0),colspan=4, rowspan=2)
+            plot2 = plt.subplot2grid((3,4),(2,0),colspan=4, rowspan=1)
+            plot1.plot(a,b,label = f"({e[0][0]:.2g}±{np.sqrt(e[1][0][0]):.2g})x+({e[0][1]:.2g}±{np.sqrt(e[1][1][1]):.2g})")
+            plot1.errorbar(a,c,yerr=d,xerr = 0.01/np.sqrt(12), fmt=".k",elinewidth = 0.75,capsize=5)
+            plot2.scatter(a,f)
+            plot2.set_ylabel("Résidus normalisés")
+            plot1.set_ylabel("Résistivité (Ωm)")
+            plot2.set_xlabel("Température (K)")
+            plot1.grid(True)
+            plot1.legend()
+            plot2.grid(True)
+            plt.show()
+
         elif Nom_materiau_utilisé == "molyb":
 
             plot1 = plt.subplot2grid((4,4),(0,0),colspan=4, rowspan=2)
