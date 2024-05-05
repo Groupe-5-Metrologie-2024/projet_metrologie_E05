@@ -260,6 +260,7 @@ def f_integrale_struve_b(xi,b,rho=rho_approx_cuivre,mur=1):
     l_moins = a-d/2
     F = (np.pi/(2*eta))*l_plus*(K(1,l_plus*eta)*L(0,l_plus*eta)+L(1,l_plus*eta)*K(0,l_plus*eta)) - (np.pi/(2*eta))*l_moins*(K(1,l_moins*eta)*L(0,l_moins*eta)+L(1,l_moins*eta)*K(0,l_moins*eta))
     return (2/xi)**2*np.sin(l*xi/2)**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*F**2
+
 def f_integrale_struve_a(xi,a,rho=rho_approx_cuivre,mur=1):
     gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
     eta = (xi**2-omega**2*mu0*e0)**(1/2)
@@ -267,6 +268,7 @@ def f_integrale_struve_a(xi,a,rho=rho_approx_cuivre,mur=1):
     l_moins = a-d/2
     F = (np.pi/(2*eta))*l_plus*(K(1,l_plus*eta)*L(0,l_plus*eta)+L(1,l_plus*eta)*K(0,l_plus*eta)) - (np.pi/(2*eta))*l_moins*(K(1,l_moins*eta)*L(0,l_moins*eta)+L(1,l_moins*eta)*K(0,l_moins*eta))
     return (2/xi)**2*np.sin(l*xi/2)**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*F**2
+
 def f_integrale_struve_l(xi,l,rho=rho_approx_cuivre,mur=1):
     gamma = b*(xi**2+1j*omega*mur*mu0/rho-omega**2*mu0*mur*e0*er)**(1/2)
     eta = (xi**2-omega**2*mu0*e0)**(1/2)
@@ -282,17 +284,21 @@ def f_integrale_struve_d(xi,d,rho=rho_approx_cuivre,mur=1):
     l_moins = a-d/2
     F = (np.pi/(2*eta))*l_plus*(K(1,l_plus*eta)*L(0,l_plus*eta)+L(1,l_plus*eta)*K(0,l_plus*eta)) - (np.pi/(2*eta))*l_moins*(K(1,l_moins*eta)*L(0,l_moins*eta)+L(1,l_moins*eta)*K(0,l_moins*eta))
     return (2/xi)**2*np.sin(l*xi/2)**2*(mur*eta*b*I(0,eta*b)*I(1,gamma)-gamma*I(1,eta*b)*I(0,gamma))/(mur*eta*b*K(0,eta*b)*I(1,gamma)+gamma*K(1,eta*b)*I(0,gamma))*F**2
+
 #fonction partielles deltaz
 def delta_Z_struve_real_l(x=rho_approx_cuivre,l=l,z=0):
     integ = quad(f_integrale_struve_l, 0,200, args=(l,x,1,),complex_func=True,limit =1000,points=[0])
     delta_Z = 2j*omega*mu0*(n/(d*l))**2*integ[0]
     return np.imag(delta_Z-z)
+
 def delta_Z_struve_real_d(x=rho_approx_cuivre,d=d,z=0):
     delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve_d, 0,200, args=(d,x,1,),complex_func=True,limit =1000,points=[0])[0]
     return np.imag(delta_Z-z)
+
 def delta_Z_struve_real_a(x=rho_approx_cuivre,a=a,z=0):
     delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve_a, 0,200, args=(a,x,1,),complex_func=True,limit =1000,points=[0])[0]
     return np.imag(delta_Z-z)
+
 def delta_Z_struve_real_b(x=rho_approx_cuivre,b=b,z=0):
     delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve_b, 0,200, args=(b,x,1,),complex_func=True,limit =1000,points=[0])[0]
     return np.imag(delta_Z-z)
@@ -302,17 +308,19 @@ def delta_Z_struve_real_l_invar(x=rho_approx_cuivre,l=l,z=0):
     integ = quad(f_integrale_struve_l, 0,200, args=(l,x[0],x[1],),complex_func=True,limit =1000,points=[0])
     delta_Z = 2j*omega*mu0*(n/(d*l))**2*integ[0]
     return np.real(delta_Z-z),np.imag(delta_Z-z)
+
 def delta_Z_struve_real_d_invar(x=rho_approx_cuivre,d=d,z=0):
     delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve_d, 0,200, args=(d,x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
     return np.real(delta_Z-z),np.imag(delta_Z-z)
+
 def delta_Z_struve_real_a_invar(x=rho_approx_cuivre,a=a,z=0):
     delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve_a, 0,200, args=(a,x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
     return np.real(delta_Z-z),np.imag(delta_Z-z)
+
 def delta_Z_struve_real_b_invar(x=rho_approx_cuivre,b=b,z=0):
     delta_Z = 2j*omega*mu0*(n/(d*l))**2*quad(f_integrale_struve_b, 0,200, args=(b,x[0],x[1],),complex_func=True,limit =1000,points=[0])[0]
     return np.real(delta_Z-z),np.imag(delta_Z-z)
 
-#incertitudes
 def incertitude(z,phaseurs,alpha_res=0, alpha_sin = 0, mu =1):
     dx = 1e-10
     #dimensions
@@ -325,6 +333,7 @@ def incertitude(z,phaseurs,alpha_res=0, alpha_sin = 0, mu =1):
     incertitude_mix = (fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z+1j*dx))-fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z)))/dx*alpha_res
     incertitude_totale += incertitude_mix**2
     return incertitude_totale[0]
+
 def incertitude_invar(z,phaseurs,alpha_res=0, alpha_sin = 0, mu =1):
     dx = 1e-10
     #dimensions
@@ -337,6 +346,7 @@ def incertitude_invar(z,phaseurs,alpha_res=0, alpha_sin = 0, mu =1):
     incertitude_mix = (fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z+1j*dx))-fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z)))/dx*alpha_res
     incertitude_totale += incertitude_mix**2
     return incertitude_totale[0]
+
 def incertitude_verif(z,alpha_res=0, alpha_sin = 0, mu =1):
     dx = 1e-10
     #dimensions
@@ -359,8 +369,8 @@ def TOTAL(Materiau):
                 try :
                     sinus = analyse_donnees(f"{Chemin_relatif}/Données_invar_{i}.lvm")
                 except :
-                    print('Erreur de chemin')
-                    sinus = analyse_donnees(f"{Chemin_relatif}\Données_invar_{i}.lvm")
+                    print('Erreur Chemin, Tentative chemin Windows')
+                    sinus = analyse_donnees(f"{Chemin_relatif}\\Données_invar_{i}.lvm")
                 traité = phase(sinus)
                 print('a')
                 phaseurs = traité[0]
@@ -373,9 +383,14 @@ def TOTAL(Materiau):
                 incertitude_z = np.sqrt((np.imag(2*(z2)/(1-poo**(-1))**2*1/phaseurs[0]*erreur_res[1]))**2+(np.imag(2*(z2)/(1-poo**(-1))**2*phaseurs[1]/phaseurs[0]**2*erreur_res[0]))**2)
                 print('c')
                 rho = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z))
+                print(z,phaseurs,incertitude_z,alpha_param)
                 print('d')
                 rho_incertitude = np.sqrt(incertitude(z,phaseurs, incertitude_z, alpha_param))
                 print('e')
+                print(rho_incertitude)
+                print(rho[0])
+                print(z)
+                print([np.abs(rho[0]),rho_incertitude,i])
                 z.append([np.abs(rho[0]),rho_incertitude,i])
                 print('f')
             x = [i[2]*0.5+26.5+273.15 for i in z]
@@ -391,8 +406,8 @@ def TOTAL(Materiau):
                 try :
                     sinus = analyse_donnees(f"{Chemin_relatif}/Données_cuivre_{i}.lvm")
                 except :
-                    print('Erreur Chemin')
-                    sinus = analyse_donnees(f"{Chemin_relatif}\Données_cuivre_{i}.lvm")
+                    print('Erreur Chemin, Tentative chemin Windows')
+                    sinus = analyse_donnees(f"{Chemin_relatif}\\Données_cuivre_{i}.lvm")
                 traité = phase(sinus)
                 phaseurs = traité[0]
                 erreur_res = traité[1]
@@ -418,8 +433,8 @@ def TOTAL(Materiau):
                 try :
                     sinus = analyse_donnees(f"{Chemin_relatif}/Données_molyb_{i}.lvm")
                 except :
-                    print('Erreur Chemin')
-                    sinus = analyse_donnees(f"{Chemin_relatif}\Données_molyb_{i}.lvm")
+                    print('Erreur Chemin, Tentative chemin Windows')
+                    sinus = analyse_donnees(f"{Chemin_relatif}\\Données_molyb_{i}.lvm")
                 traité = phase(sinus)
                 phaseurs = traité[0]
                 erreur_res = traité[1]
