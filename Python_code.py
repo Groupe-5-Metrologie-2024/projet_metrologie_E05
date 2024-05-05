@@ -53,11 +53,11 @@ Chemin_relatif = "Données"
 #MATERIAUX POSSIBLES SONT : "cuivre" ; "molyb" ; "invar_avec" ; "invar_sans"     (le avec et sans réfère à l'utilisation ou non d'aimants)
 #CODE 1
 if Activation_Production_CSV_rho == 1 :
-    Nom_materiau_utilisé = "invar_avec"
+    Nom_materiau_utilisé = "invar_sans"
 
 #CODE 2
 if Activation_Graphique_résistivité_Température == 1 :  
-    Nom_materiau_utilisé = "invar_avec"
+    Nom_materiau_utilisé = "invar_sans"
 
 
 #----- Données -----#
@@ -325,7 +325,7 @@ def TOTAL(Materiau):
     z = []
     try :
         if Materiau == "invar_avec" :
-            for i in range(1,60):
+            for i in range(1,51):
                 print(f'Calcul en cours sur le fichier {i}...')
                 try :
                     sinus_inv = analyse_donnees(f"{Chemin_relatif}/Données_invar_avec_{i}.lvm")
@@ -354,7 +354,7 @@ def TOTAL(Materiau):
             res = [(y[i]-y_fit[i])/err[i] for i in range(len(x))]
         
         if Materiau == "invar_sans" :
-            for i in range(1,60):
+            for i in range(1,46):
                 print(f'Calcul en cours sur le fichier {i}...')
                 try :
                     sinus_inv = analyse_donnees(f"{Chemin_relatif}/Données_invar_sans_{i}.lvm")
@@ -383,7 +383,7 @@ def TOTAL(Materiau):
             res = [(y[i]-y_fit[i])/err[i] for i in range(len(x))]
 
         elif Materiau == "cuivre":
-            for i in range(1,60):
+            for i in range(1,52):
                 print(f'Calcul sur le fichier {i} en cours...')
                 try :
                     sinus_cu = analyse_donnees(f"{Chemin_relatif}/Données_cuivre_{i}.lvm")
@@ -411,7 +411,7 @@ def TOTAL(Materiau):
             res = [(y[i]-y_fit[i])/err[i] for i in range(len(x))]
         
         elif Materiau == "molyb":
-            for i in range(1,60):
+            for i in range(1,54):
                 print(f'Calcul sur le fichier {i} en cours...')
                 try :
                     sinus_molyb = analyse_donnees(f"{Chemin_relatif}/Données_molyb_{i}.lvm")
