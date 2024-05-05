@@ -53,11 +53,11 @@ Chemin_relatif = "Données"
 #MATERIAUX POSSIBLES SONT : "cuivre" ; "molyb" ; "invar_avec" ; "invar_sans"     (le avec et sans réfère à l'utilisation ou non d'aimants)
 #CODE 1
 if Activation_Production_CSV_rho == 1 :
-    Nom_materiau_utilisé = "invar_sans"
+    Nom_materiau_utilisé = "molyb"
 
 #CODE 2
 if Activation_Graphique_résistivité_Température == 1 :  
-    Nom_materiau_utilisé = "invar_sans"
+    Nom_materiau_utilisé = "molyb"
 
 
 #----- Données -----#
@@ -390,7 +390,7 @@ def TOTAL(Materiau):
                 except :
                     print('Erreur Chemin, Tentative chemin Windows')
                     sinus_cu = analyse_donnees(f"{Chemin_relatif}\\Données_cuivre_{i}.lvm")
-                traité = phase(sinus_molyb)
+                traité = phase(sinus_cu)
                 phaseurs_cu = traité[0]
                 alpha_param = traité[1]
                 poo_cu = -(phaseurs_cu[0])/phaseurs_cu[1]/(1+2*2370/325.113)
@@ -398,7 +398,7 @@ def TOTAL(Materiau):
                 incertitude_G = np.sqrt((2/325.113*0.151421)**2+(2/325.113**2*2370*1.2824)**2)
                 incertitude_g = np.sqrt(+(np.imag(2*(z2)/(1-poo_cu**(-1)*(1+2*2370/325.113))**2*phaseurs_cu[1]/phaseurs_cu[0]*incertitude_G))**2)
                 rho = fsolve(delta_Z_struve_real,[rho_approx_cuivre],args = (z_cu))
-                rho_incertitude = np.sqrt(incertitude(z_molyb,phaseurs_cu, incertitude_g, alpha_param))
+                rho_incertitude = np.sqrt(incertitude(z_cu,phaseurs_cu, incertitude_g, alpha_param))
                 if np.abs(rho[0])<1e-5:
                     z.append([np.abs(rho[0]),rho_incertitude,i])
             x = [i[2]*0.5+25.5+273.15 for i in z]
